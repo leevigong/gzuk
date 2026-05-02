@@ -77,6 +77,92 @@ final class DrawingStoreTests: XCTestCase {
         XCTAssertEqual(store.shapes.count, 2)
     }
 
+    func test_setTool_updatesCurrentTool() {
+        store.setTool(.rectangle)
+        XCTAssertEqual(store.currentTool, .rectangle)
+    }
+
+    func test_setColor_updatesCurrentColor() {
+        store.setColor(.systemBlue)
+        XCTAssertEqual(store.currentColor, .systemBlue)
+    }
+
+    func test_setLineWidth_updatesCurrentLineWidth() {
+        store.setLineWidth(10)
+        XCTAssertEqual(store.currentLineWidth, 10)
+    }
+
+    func test_commitNonFreehand_addsShape() {
+        let rect = Shape.rectangle(rect: CGRect(x: 0, y: 0, width: 50, height: 50),
+                                   color: .red, lineWidth: 3, filled: false)
+        store.commitShape(rect)
+        XCTAssertEqual(store.shapes.count, 1)
+        XCTAssertEqual(store.shapes[0], rect)
+    }
+
+    func test_commitNonFreehand_isUndoable() {
+        let line = Shape.line(from: .zero, to: CGPoint(x: 100, y: 0),
+                              color: .red, lineWidth: 3)
+        store.commitShape(line)
+        store.undo()
+        XCTAssertTrue(store.shapes.isEmpty)
+    }
+
+    func test_eraseShape_removesByIndex() {
+        let a = Shape.rectangle(rect: CGRect(x: 0, y: 0, width: 50, height: 50),
+                                color: .red, lineWidth: 3, filled: true)
+        let b = Shape.line(from: .zero, to: CGPoint(x: 10, y: 10),
+                           color: .blue, lineWidth: 3)
+        store.commitShape(a)
+        store.commitShape(b)
+
+        store.eraseShape(at: 0)
+        XCTAssertEqual(store.shapes, [b])
+    }
+
+    func test_eraseShape_isUndoable() {
+        let a = Shape.rectangle(rect: CGRect(x: 0, y: 0, width: 50, height: 50),
+                                color: .red, lineWidth: 3, filled: true)
+        store.commitShape(a)
+        store.eraseShape(at: 0)
+        store.undo()
+        XCTAssertEqual(store.shapes, [a])
+    }
+
+    func test_counter_startsAt1AndIncrementsOnCommit() {
+        XCTAssertEqual(store.nextCounterNumber, 1)
+        let c = Shape.counter(center: CGPoint(x: 10, y: 10),
+                              number: store.nextCounterNumber, color: .red)
+        store.commitShape(c)
+        XCTAssertEqual(store.nextCounterNumber, 2)
+    }
+
+    func test_counter_undoDecrements() {
+        let c = Shape.counter(center: .zero,
+                              number: store.nextCounterNumber, color: .red)
+        store.commitShape(c)
+        XCTAssertEqual(store.nextCounterNumber, 2)
+        store.undo()
+        XCTAssertEqual(store.nextCounterNumber, 1)
+    }
+
+    func test_counter_clearResetsTo1() {
+        let c = Shape.counter(center: .zero,
+                              number: store.nextCounterNumber, color: .red)
+        store.commitShape(c)
+        store.commitShape(c)
+        store.clear()
+        XCTAssertEqual(store.nextCounterNumber, 1)
+    }
+
+    func test_whiteboard_togglesAndStartsOff() {
+        XCTAssertFalse(store.isWhiteboard)
+        store.toggleWhiteboard()
+        XCTAssertTrue(store.isWhiteboard)
+        store.toggleWhiteboard()
+        XCTAssertFalse(store.isWhiteboard)
+    }
+
     // helper
     private func addOneShape() {
         store.beginShape(at: .zero)

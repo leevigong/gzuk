@@ -4,6 +4,11 @@ final class StatusItemController {
     private let statusItem: NSStatusItem
     private let onToggle: () -> Void
 
+    /// Frame of the status item button in screen coordinates (or nil if unavailable).
+    var buttonFrameOnScreen: NSRect? {
+        statusItem.button?.window?.frame
+    }
+
     init(onToggle: @escaping () -> Void) {
         self.onToggle = onToggle
         self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
