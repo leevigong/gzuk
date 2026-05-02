@@ -3,15 +3,16 @@ import Observation
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private let store = DrawingStore()
+    private let settingsController = SettingsWindowController()
     private var statusItemController: StatusItemController?
     private var hotkeyManager: HotkeyManager?
     private var overlayController: OverlayWindowController?
     private var toolbarController: ToolbarWindowController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        statusItemController = StatusItemController { [weak self] in
-            self?.store.toggle()
-        }
+        statusItemController = StatusItemController(
+            onToggle: { [weak self] in self?.store.toggle() },
+            onSettings: { [weak self] in self?.settingsController.show() })
 
         overlayController = OverlayWindowController(store: store)
         toolbarController = ToolbarWindowController(store: store) { [weak self] in

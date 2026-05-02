@@ -19,12 +19,26 @@ final class ToolbarWindowController {
         let size = hosting.fittingSize
         let win = ToolbarWindow(contentSize: size)
         win.contentView = hosting
+        win.alphaValue = PreferencesStore.shared.toolbarOpacity
 
         let origin = ToolbarPositionStore.load()
             ?? defaultOrigin(for: size)
         win.setFrameOrigin(origin)
         win.orderFront(nil)
         self.window = win
+
+        observeOpacity()
+    }
+
+    private func observeOpacity() {
+        withObservationTracking {
+            _ = PreferencesStore.shared.toolbarOpacity
+        } onChange: { [weak self] in
+            DispatchQueue.main.async {
+                self?.window?.alphaValue = PreferencesStore.shared.toolbarOpacity
+                self?.observeOpacity()
+            }
+        }
     }
 
     func hide() {
