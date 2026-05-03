@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: "그려적어 (GZUK) — 화면 위에 바로 그리고 적는 macOS 앱",
   description:
     "회의 중, 강의 중, 데모 중 — 어떤 화면 위에서도 즉시 그리고 적을 수 있는 macOS 오픈소스 어노테이션 앱.",
-  metadataBase: new URL("https://gzuk.app"),
+  metadataBase: new URL("https://gzuk-app.vercel.app"),
   openGraph: {
     title: "그려적어 (GZUK)",
     description: "화면 위에 바로 그리고 적는 macOS 앱",

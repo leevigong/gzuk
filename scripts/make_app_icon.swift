@@ -5,13 +5,16 @@
 // near-black, matching the in-app brand. Produces all sizes Xcode expects
 // in the AppIcon asset catalog.
 //
-// Usage: swift scripts/make_app_icon.swift
+// Usage: run from the repo root — `swift scripts/make_app_icon.swift`
 //
 
 import AppKit
 import CoreText
 
-let projectRoot = "~/dev/gzuk"
+// Resolve paths relative to the script's location so this works no matter
+// who clones the repo or where it lives on disk.
+let scriptURL  = URL(fileURLWithPath: CommandLine.arguments[0]).resolvingSymlinksInPath()
+let projectRoot = scriptURL.deletingLastPathComponent().deletingLastPathComponent().path
 let fontPath    = "\(projectRoot)/GZUK/Resources/Fonts/GowunDodum-Regular.ttf"
 let outputDir   = "\(projectRoot)/GZUK/Assets.xcassets/AppIcon.appiconset"
 
