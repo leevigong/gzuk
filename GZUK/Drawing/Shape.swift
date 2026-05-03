@@ -8,5 +8,5 @@ enum Shape: Equatable {
     case rectangle(rect: CGRect, color: NSColor, lineWidth: CGFloat, filled: Bool)
     case circle(rect: CGRect, color: NSColor, lineWidth: CGFloat, filled: Bool)
     case text(origin: CGPoint, string: String, font: NSFont, color: NSColor, maxWidth: CGFloat)
-    case counter(center: CGPoint, number: Int, color: NSColor)
+    case counter(center: CGPoint, number: Int, color: NSColor, lineWidth: CGFloat)
 }

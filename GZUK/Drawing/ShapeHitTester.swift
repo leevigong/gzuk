@@ -29,8 +29,8 @@ enum ShapeHitTester {
                 dx: -tolerance, dy: -tolerance)
             return bb.contains(point)
 
-        case .counter(let center, _, _):
-            let radius: CGFloat = 14 + tolerance
+        case .counter(let center, _, _, let lineWidth):
+            let radius = ShapeRenderer.counterRadius(lineWidth: lineWidth) + tolerance
             return hypot(point.x - center.x, point.y - center.y) <= radius
 
         default:

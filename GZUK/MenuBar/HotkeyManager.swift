@@ -4,9 +4,9 @@ import AppKit
 final class HotkeyManager {
     private var hotkey: HotKey?
 
-    /// Registers ⌘⇧⌥7 and calls `onTrigger` when it fires.
+    /// Registers ⌃G and calls `onTrigger` when it fires.
     func register(onTrigger: @escaping () -> Void) {
-        hotkey = HotKey(key: .seven, modifiers: [.command, .shift, .option])
+        hotkey = HotKey(key: .g, modifiers: [.control])
         hotkey?.keyDownHandler = {
             onTrigger()
         }

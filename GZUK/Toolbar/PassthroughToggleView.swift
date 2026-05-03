@@ -20,8 +20,5 @@ struct PassthroughToggleView: View {
                 )
         }
         .buttonStyle(.plain)
-        .help(store.isPassthrough
-              ? "Click-through ON — cursor passes through to apps below"
-              : "Click-through OFF — cursor draws on overlay")
     }
 }

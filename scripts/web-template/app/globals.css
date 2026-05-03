@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #FBFBFD;        /* Apple's marketing pages use a near-white off-gray */
+  --fg: #1D1D1F;
+  --muted: #6E6E73;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0B0B0B;
+    --fg: #F5F5F7;
+    --muted: #A1A1A6;
+  }
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  /* Keep CJK words intact at line breaks — Korean compound words like 자유
+     should not split mid-syllable when a card width forces a wrap. */
+  word-break: keep-all;
+}
+
+/* Subtle fade+rise reveal for sections — triggered by IntersectionObserver
+   in page.tsx. Apple's pages use this exact "comes into view then settles"
+   feel. */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+.reveal.in {
+  opacity: 1;
+  transform: translateY(0);
+}

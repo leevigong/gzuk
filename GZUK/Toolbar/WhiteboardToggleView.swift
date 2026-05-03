@@ -18,8 +18,5 @@ struct WhiteboardToggleView: View {
                 )
         }
         .buttonStyle(.plain)
-        .help(store.isWhiteboard
-              ? "Whiteboard ON (white background)"
-              : "Whiteboard OFF (transparent)")
     }
 }

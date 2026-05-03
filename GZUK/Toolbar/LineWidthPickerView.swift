@@ -22,7 +22,7 @@ struct LineWidthPickerView: View {
                         )
                 }
                 .buttonStyle(.plain)
-                .help("\(Int(w))pt")
+                .tooltip(L.t("굵기 \(Int(w))pt", "Width \(Int(w))pt"))
             }
         }
     }

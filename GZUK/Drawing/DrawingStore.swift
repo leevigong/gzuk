@@ -17,6 +17,9 @@ final class DrawingStore {
     /// When true, the overlay window passes mouse clicks through to apps
     /// underneath while still showing existing strokes. Toolbar still works.
     private(set) var isPassthrough: Bool = false
+    /// When true, the toolbar collapses to a small pill that can be expanded
+    /// back. Drawing mode stays active.
+    private(set) var isToolbarCollapsed: Bool = false
     private(set) var nextCounterNumber: Int = 1
 
     private var undoStack: [Snapshot] = []
@@ -45,6 +48,10 @@ final class DrawingStore {
         isPassthrough.toggle()
     }
 
+    func toggleToolbarCollapsed() {
+        isToolbarCollapsed.toggle()
+    }
+
     /// Posted when the user wants to open Settings from inside the canvas
     /// (e.g. ⌘, while drawing mode is active and the menu bar status item
     /// can't be reached).
@@ -57,6 +64,11 @@ final class DrawingStore {
 
     func setTool(_ tool: Tool) {
         currentTool = tool
+        // Selecting a drawing tool implies the user wants to draw, so leave
+        // pass-through (cursor) mode automatically.
+        if isPassthrough {
+            isPassthrough = false
+        }
     }
 
     func setColor(_ color: NSColor) {

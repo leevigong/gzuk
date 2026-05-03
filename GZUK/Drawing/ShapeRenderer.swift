@@ -30,8 +30,8 @@ enum ShapeRenderer {
             return textPath(string: string, font: font, origin: origin,
                             maxWidth: maxWidth)
 
-        case .counter(let center, _, _):
-            return counterPath(center: center)
+        case .counter(let center, _, _, let lineWidth):
+            return counterPath(center: center, lineWidth: lineWidth)
         }
     }
 
@@ -66,9 +66,10 @@ enum ShapeRenderer {
             ctx.addPath(path(for: shape))
             ctx.fillPath()
 
-        case .counter(let center, let number, let color):
-            // Filled circle + number text on top
-            let radius: CGFloat = 14
+        case .counter(let center, let number, let color, let lineWidth):
+            // Filled circle + number text on top. Both scale with the
+            // current line-width slider so the badge matches stroke weight.
+            let radius = counterRadius(lineWidth: lineWidth)
             let rect = CGRect(x: center.x - radius, y: center.y - radius,
                               width: radius * 2, height: radius * 2)
             ctx.setFillColor(color.cgColor)
@@ -76,7 +77,7 @@ enum ShapeRenderer {
             ctx.fillPath()
 
             // Number in white, centered
-            let font = NSFont.boldSystemFont(ofSize: 16)
+            let font = NSFont.boldSystemFont(ofSize: counterFontSize(lineWidth: lineWidth))
             let numberPath = textPath(string: "\(number)",
                                       font: font,
                                       origin: .zero)
@@ -168,11 +169,22 @@ enum ShapeRenderer {
         return combined
     }
 
-    private static func counterPath(center: CGPoint) -> CGPath {
-        let radius: CGFloat = 14
+    private static func counterPath(center: CGPoint, lineWidth: CGFloat) -> CGPath {
+        let radius = counterRadius(lineWidth: lineWidth)
         let rect = CGRect(x: center.x - radius, y: center.y - radius,
                           width: radius * 2, height: radius * 2)
         return CGPath(ellipseIn: rect, transform: nil)
+    }
+
+    /// Counter circle radius scales with the line-width slider so the badge
+    /// visually matches stroke weight (default lineWidth=4 keeps the legacy
+    /// 14pt radius). Same factor used by ShapeHitTester for hit detection.
+    static func counterRadius(lineWidth: CGFloat) -> CGFloat {
+        max(8, lineWidth * 3.5)
+    }
+
+    static func counterFontSize(lineWidth: CGFloat) -> CGFloat {
+        max(10, lineWidth * 4)
     }
 
     private static func strokePath(_ path: CGPath,

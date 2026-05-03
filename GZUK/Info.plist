@@ -6,5 +6,7 @@
 	<string>그려적어</string>
 	<key>CFBundleName</key>
 	<string>그려적어</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.graphics-design</string>
 </dict>
 </plist>

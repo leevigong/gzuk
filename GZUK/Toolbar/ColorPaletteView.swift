@@ -4,21 +4,21 @@ import AppKit
 struct ColorPaletteView: View {
     let store: DrawingStore
 
-    private static let presets: [(NSColor, String)] = [
-        (.systemRed, "Red"),
-        (.systemOrange, "Orange"),
-        (.systemYellow, "Yellow"),
-        (.systemGreen, "Green"),
-        (.systemBlue, "Blue"),
-        (.systemPurple, "Purple"),
-        (.white, "White"),
-        (.black, "Black"),
+    private static let presets: [(NSColor, () -> String)] = [
+        (.systemRed,    { L.t("빨강", "Red") }),
+        (.systemOrange, { L.t("주황", "Orange") }),
+        (.systemYellow, { L.t("노랑", "Yellow") }),
+        (.systemGreen,  { L.t("초록", "Green") }),
+        (.systemBlue,   { L.t("파랑", "Blue") }),
+        (.systemPurple, { L.t("보라", "Purple") }),
+        (.white,        { L.t("흰색", "White") }),
+        (.black,        { L.t("검정", "Black") }),
     ]
 
     var body: some View {
         HStack(spacing: 4) {
             ForEach(Array(Self.presets.enumerated()), id: \.offset) { _, item in
-                let (color, name) = item
+                let (color, nameFn) = item
                 Button {
                     store.setColor(color)
                 } label: {
@@ -34,7 +34,7 @@ struct ColorPaletteView: View {
                         )
                 }
                 .buttonStyle(.plain)
-                .help(name)
+                .tooltip(nameFn())
             }
         }
     }

@@ -12,9 +12,12 @@ final class ToolbarWindow: NSWindow {
         self.isOpaque = false
         self.backgroundColor = .clear
         self.hasShadow = true
-        // Higher than OverlayWindow's .floating (3); above .popUpMenu (101)
-        // to ensure clicks land here, not on the overlay.
-        self.level = NSWindow.Level(rawValue: NSWindow.Level.popUpMenu.rawValue + 1)
+        // Sit at the same level as the Settings window (both .floating + 1)
+        // so whichever was clicked most recently floats to the top — Settings
+        // doesn't trap the toolbar, and bringing Settings forward doesn't
+        // trap Settings behind the toolbar. Still ABOVE OverlayWindow
+        // (.floating = 3) and BELOW .popUpMenu (101) so menubar popups win.
+        self.level = NSWindow.Level(rawValue: NSWindow.Level.floating.rawValue + 1)
         self.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary,
                                    .stationary, .ignoresCycle]
         self.isReleasedWhenClosed = false

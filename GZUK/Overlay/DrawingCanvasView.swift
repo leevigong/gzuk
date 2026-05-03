@@ -82,7 +82,8 @@ final class DrawingCanvasView: NSView, NSTextFieldDelegate {
         case .counter:
             let counter = Shape.counter(center: p,
                                         number: store.nextCounterNumber,
-                                        color: store.currentColor)
+                                        color: store.currentColor,
+                                        lineWidth: store.currentLineWidth)
             store.commitShape(counter)
 
         case .eraser:
