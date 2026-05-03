@@ -55,22 +55,53 @@ xattr -cr "$DIST_APP"
 echo "▸ Creating ZIP (${ZIP_NAME})…"
 ditto -c -k --sequesterRsrc --keepParent "$DIST_APP" "$ZIP_PATH"
 
-SHA256=$(shasum -a 256 "$ZIP_PATH" | awk '{print $1}')
-SIZE=$(du -h "$ZIP_PATH" | awk '{print $1}' | tr -d '[:space:]')
+ZIP_SHA256=$(shasum -a 256 "$ZIP_PATH" | awk '{print $1}')
+ZIP_SIZE=$(du -h "$ZIP_PATH" | awk '{print $1}' | tr -d '[:space:]')
+
+# Build the DMG too. We use create-dmg's defaults — a clean window with the
+# .app and an Applications-folder shortcut side by side, so the install
+# flow is the familiar drag-to-Applications. `create-dmg` picks pleasant
+# default sizes; tweak only when there's a real reason (e.g. brand-coloured
+# background image).
+DMG_NAME="gzuk-${VERSION}.dmg"
+DMG_PATH="${DIST_DIR}/${DMG_NAME}"
+
+echo "▸ Creating DMG (${DMG_NAME})…"
+if ! command -v create-dmg >/dev/null 2>&1; then
+    echo "✗ create-dmg not installed. Run: brew install create-dmg" >&2
+    exit 1
+fi
+create-dmg \
+    --volname "${APP_DISPLAY_NAME} ${VERSION}" \
+    --window-size 540 380 \
+    --icon-size 100 \
+    --icon "${APP_DISPLAY_NAME}.app" 140 180 \
+    --app-drop-link 380 180 \
+    --hide-extension "${APP_DISPLAY_NAME}.app" \
+    --no-internet-enable \
+    "$DMG_PATH" \
+    "$DIST_APP" >/dev/null
+
+DMG_SHA256=$(shasum -a 256 "$DMG_PATH" | awk '{print $1}')
+DMG_SIZE=$(du -h "$DMG_PATH" | awk '{print $1}' | tr -d '[:space:]')
 
 cat <<EOF
 
 ✓ Built ${ZIP_PATH}
-  size:   ${SIZE}
-  sha256: ${SHA256}
+  size:   ${ZIP_SIZE}
+  sha256: ${ZIP_SHA256}
+
+✓ Built ${DMG_PATH}
+  size:   ${DMG_SIZE}
+  sha256: ${DMG_SHA256}
 
 Next steps:
-  1) Upload to GitHub Releases:
-       gh release create v${VERSION} "${ZIP_PATH}" \\
+  1) Upload both to GitHub Releases:
+       gh release create v${VERSION} "${ZIP_PATH}" "${DMG_PATH}" \\
          --repo leevigong/gzuk --title "v${VERSION}"
 
-  2) Update homebrew-gzuk/Casks/gzuk.rb:
+  2) Update homebrew-gzuk/Casks/gzuk.rb (use the ZIP — fastest install):
        version "${VERSION}"
-       sha256  "${SHA256}"
+       sha256  "${ZIP_SHA256}"
        url     "https://github.com/leevigong/gzuk/releases/download/v${VERSION}/${ZIP_NAME}"
 EOF
