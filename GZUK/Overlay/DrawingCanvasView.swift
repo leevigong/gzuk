@@ -35,21 +35,39 @@ final class DrawingCanvasView: NSView, NSTextFieldDelegate {
 
     // MARK: - Drawing
 
+    /// Translate a point in the local view's coordinate space into the
+    /// system-wide screen coordinate space we use to store all shapes
+    /// (so a shape drawn on monitor A renders at the right physical
+    /// position when the same canvas instance lives on monitor B).
+    private func toGlobal(_ p: CGPoint) -> CGPoint {
+        guard let origin = window?.frame.origin else { return p }
+        return CGPoint(x: p.x + origin.x, y: p.y + origin.y)
+    }
+
     override func draw(_ dirtyRect: NSRect) {
         guard let ctx = NSGraphicsContext.current?.cgContext else { return }
 
+        // Whiteboard fill is bounded to this monitor's window — paint it
+        // before translating into screen-global space.
         if store.isWhiteboard {
             ctx.setFillColor(NSColor.white.cgColor)
             ctx.fill(bounds)
         }
 
+        // Shapes are stored in screen-global coordinates so the same store
+        // can drive every monitor's overlay. Translate by the negative of
+        // this window's screen origin so points like (1920, 100) land at
+        // view-local (0, 100) on a window whose origin is (1920, 0).
+        let originOnScreen = window?.frame.origin ?? .zero
+        ctx.saveGState()
+        ctx.translateBy(x: -originOnScreen.x, y: -originOnScreen.y)
         for shape in store.shapes {
             ShapeRenderer.draw(shape, in: ctx)
         }
-
         if let preview = makePreviewShape() {
             ShapeRenderer.draw(preview, in: ctx)
         }
+        ctx.restoreGState()
     }
 
     // MARK: - Mouse state
@@ -60,7 +78,8 @@ final class DrawingCanvasView: NSView, NSTextFieldDelegate {
     private var activeTextField: NSTextField?
 
     override func mouseDown(with event: NSEvent) {
-        let p = convert(event.locationInWindow, from: nil)
+        let pView = convert(event.locationInWindow, from: nil)
+        let p = toGlobal(pView)
 
         // Dismiss any active text editing first
         commitActiveTextField()
@@ -76,8 +95,10 @@ final class DrawingCanvasView: NSView, NSTextFieldDelegate {
 
         case .text:
             // Always start a new text field. Existing text shapes are
-            // immutable — to change them, erase and re-type.
-            startTextEditing(at: p)
+            // immutable — to change them, erase and re-type. The field is
+            // positioned in view-local coords so it appears under the click;
+            // the resulting Shape's origin is converted to global on commit.
+            startTextEditing(at: pView)
 
         case .counter:
             let counter = Shape.counter(center: p,
@@ -95,7 +116,7 @@ final class DrawingCanvasView: NSView, NSTextFieldDelegate {
     }
 
     override func mouseDragged(with event: NSEvent) {
-        let p = convert(event.locationInWindow, from: nil)
+        let p = toGlobal(convert(event.locationInWindow, from: nil))
         switch store.currentTool {
         case .pen, .highlighter:
             inProgressPoints.append(p)
@@ -231,9 +252,10 @@ final class DrawingCanvasView: NSView, NSTextFieldDelegate {
         let maxWidth = field.frame.width
         // Convert NSTextField top-left frame into a baseline-anchored origin
         // so ShapeRenderer (which expects baseline) draws at the same visual
-        // location the user just typed in.
+        // location the user just typed in. Promote to global screen coords
+        // so other monitors' canvases render the text in the same place.
         let baselineY = field.frame.maxY - field.firstBaselineOffsetFromTop
-        let origin = CGPoint(x: field.frame.minX + 2, y: baselineY)
+        let origin = toGlobal(CGPoint(x: field.frame.minX + 2, y: baselineY))
         field.removeFromSuperview()
         activeTextField = nil
         if !text.isEmpty {

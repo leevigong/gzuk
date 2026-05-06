@@ -35,9 +35,15 @@ final class ToolbarWindowController {
         win.contentView = hosting
         win.alphaValue = PreferencesStore.shared.toolbarOpacity
 
-        // Restore the user's last position if they dragged the toolbar
-        // before; otherwise use the default (top-center of the screen).
-        let origin = ToolbarPositionStore.load() ?? defaultOrigin(for: size)
+        // Restore the user's last drag position if it's still on a visible
+        // screen. ⌃G is just a toggle — pressing it on a different monitor
+        // shouldn't move the toolbar; the session sticks where it started.
+        // The "click an icon on monitor B to start a new session there"
+        // path explicitly clears the stored position before toggling, so
+        // load() returns nil and we fall through to defaultOrigin (which
+        // anchors to the cursor's monitor).
+        let origin = Self.onScreenOrigin(ToolbarPositionStore.load(), size: size)
+                  ?? defaultOrigin(for: size)
         win.setFrameOrigin(origin)
         win.orderFront(nil)
         self.window = win
@@ -105,30 +111,42 @@ final class ToolbarWindowController {
     /// current cursor's screen so it doesn't end up stranded off-screen.
     private func handleScreenChange() {
         guard let win = window else { return }
-        let center = CGPoint(x: win.frame.midX, y: win.frame.midY)
-        let stillVisible = NSScreen.screens.contains { $0.visibleFrame.contains(center) }
-        if !stillVisible {
-            let origin = defaultOrigin(for: win.frame.size)
-            win.setFrameOrigin(origin)
+        if Self.onScreenOrigin(win.frame.origin, size: win.frame.size) == nil {
+            win.setFrameOrigin(defaultOrigin(for: win.frame.size))
         }
+    }
+
+    /// Returns the origin unchanged if a window of the given size placed
+    /// there would have its center on at least one visible screen; nil
+    /// otherwise. Lets callers decide whether to keep or fall back.
+    private static func onScreenOrigin(_ origin: CGPoint?, size: CGSize) -> CGPoint? {
+        guard let origin else { return nil }
+        let center = CGPoint(x: origin.x + size.width / 2,
+                             y: origin.y + size.height / 2)
+        let visible = NSScreen.screens.contains { $0.visibleFrame.contains(center) }
+        return visible ? origin : nil
     }
 
     /// Default position: anchored under the 그적 menubar status item like a
     /// popover, so users see "this came from there." Falls back to top-
-    /// center if the status item position is unavailable (no screen with
-    /// cursor, etc.).
+    /// center if the status item position is unavailable or on a different
+    /// monitor (NSStatusItem only reports one button frame even when the
+    /// icon visually appears on every display, so its anchor X is always
+    /// the primary monitor's — clamping that into a secondary monitor's
+    /// range would pin the toolbar to a screen edge instead of centering).
     private func defaultOrigin(for size: CGSize) -> CGPoint {
         let screen = ScreenManager.screenWithCursor() ?? NSScreen.main
-        guard let f = screen?.visibleFrame else {
+        guard let s = screen, case let f = s.visibleFrame else {
             return CGPoint(x: 100, y: 100)
         }
         // 1pt cosmetic gap below the menubar.
         let topY = f.maxY - size.height - 1
 
-        if let anchor = anchorProvider() {
-            // Center the toolbar horizontally on the status item, but clamp
-            // to keep it fully on-screen (right edge especially — the icon
-            // sits near the right of the menubar).
+        if let anchor = anchorProvider(),
+           s.frame.contains(CGPoint(x: anchor.midX, y: anchor.midY)) {
+            // Anchor is on the same monitor as the cursor — center the
+            // toolbar horizontally under the status item icon, clamped to
+            // keep it fully on-screen.
             let desiredX = anchor.midX - size.width / 2
             let minX = f.minX + 4
             let maxX = f.maxX - size.width - 4
@@ -136,7 +154,7 @@ final class ToolbarWindowController {
             return CGPoint(x: x, y: topY)
         }
 
-        // Fallback — top-center of screen.
+        // No anchor or anchor is on a different monitor → top-center.
         return CGPoint(x: f.midX - size.width / 2, y: topY)
     }
 }

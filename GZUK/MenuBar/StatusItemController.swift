@@ -11,6 +11,7 @@ final class StatusItemController: NSObject {
     private var menuShowing = false
     private var globalMouseMonitor: Any?
     private var localMouseMonitor: Any?
+    private var appearanceObservation: NSKeyValueObservation?
 
     /// Frame of the status item button in screen coordinates (or nil if unavailable).
     var buttonFrameOnScreen: NSRect? {
@@ -30,6 +31,15 @@ final class StatusItemController: NSObject {
             button.target = self
             button.action = #selector(handleClick(_:))
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+
+            // The menubar's effectiveAppearance flips for reasons beyond a system
+            // Light/Dark toggle — wallpaper changes, fullscreen apps behind the
+            // menubar, window blur sources moving. Observe the button directly so
+            // the literal-color glyph (we don't use isTemplate) re-renders for
+            // every appearance change, not just system theme flips.
+            appearanceObservation = button.observe(\.effectiveAppearance, options: [.new]) { [weak self] _, _ in
+                self?.refreshIcon()
+            }
         }
 
         // Refresh icon when our app gains/loses focus so the dot accurately
@@ -40,12 +50,6 @@ final class StatusItemController: NSObject {
         NotificationCenter.default.addObserver(
             self, selector: #selector(refreshIcon),
             name: NSApplication.didResignActiveNotification, object: nil)
-        // Re-render the glyph when the system flips between light/dark mode
-        // so the literal-color icon (we don't use isTemplate) stays visible.
-        DistributedNotificationCenter.default.addObserver(
-            self, selector: #selector(refreshIcon),
-            name: Notification.Name("AppleInterfaceThemeChangedNotification"),
-            object: nil)
 
         // Custom hover detection: NSStatusBar's tracking-area dispatch is
         // unreliable (system intercepts events), so poll mouse position via
@@ -73,7 +77,17 @@ final class StatusItemController: NSObject {
             return
         }
         guard let frame = buttonFrameOnScreen else { return }
-        let inside = frame.contains(NSEvent.mouseLocation)
+        let mouse = NSEvent.mouseLocation
+        // Early-out before the rect-contains and tooltip transitions: the
+        // global mouse-moved monitor fires for every cursor move anywhere on
+        // the system, but ~all of those are nowhere near the menubar. Rejecting
+        // out-of-band Y values here keeps this monitor from burning battery
+        // while the user works in other apps.
+        if mouse.y < frame.minY - 4 {
+            if hovering { hovering = false; TooltipManager.shared.hide() }
+            return
+        }
+        let inside = frame.contains(mouse)
         if inside, !hovering {
             hovering = true
             // TooltipManager places the tooltip ~14pt below the anchor;
@@ -134,17 +148,19 @@ final class StatusItemController: NSObject {
         return L.t("그리는 중", "Drawing")
     }
 
-    /// Draws a vertical stack of "그" over "적", plus an optional small dot
-    /// in the top-right indicating drawing-mode state:
-    ///   active && focused → bright red dot (shortcuts will work)
-    ///   active && !focused → muted gray dot (drawing on, but our app
-    ///                                          isn't frontmost so shortcuts
-    ///                                          won't fire)
-    ///   !active → no dot
+    /// Draws a vertical stack of "그" over "적" with a small status dot in
+    /// the top-right that has three states:
+    ///   !active           → red outline (drawing mode off, "ready")
+    ///   active && focused → red filled dot (drawing on, shortcuts will work)
+    ///   active && !focused→ gray filled dot (drawing on but our app isn't
+    ///                                         frontmost — shortcuts won't fire)
+    /// The dot space is reserved in EVERY state so the icon doesn't shift
+    /// width when the dot transitions. The dot is always-visible so it serves
+    /// as both a quiet brand mark (idle) and a status signal (active).
     /// Glyphs are drawn with a literal color (white in dark mode, near-black
-    /// in light) and `isTemplate = false`, so the active state's red dot
-    /// keeps its color AND the inactive state's stroke weight matches the
-    /// active one (template inversion was visibly thinning the fake-bold).
+    /// in light) and `isTemplate = false` so the colored dot survives intact
+    /// (template inversion would also visibly thin the fake-bold strokes on
+    /// "그").
     private static func makeStatusBarImage(active: Bool, focused: Bool, dark: Bool) -> NSImage {
         let fontSize: CGFloat = 11
         let visualGap: CGFloat = 4           // visible space between glyph cap-tops
@@ -184,11 +200,18 @@ final class StatusItemController: NSObject {
         let contentWidth = max(topSize.width, bottomSize.width)
         let contentHeight = topY + bold.ascender + abs(bold.descender)
 
-        // Reserve a little extra space top-right for the active-state dot.
-        let dotDiameter: CGFloat = 4
-        let extraRightSpace: CGFloat = active ? dotDiameter + 1 : 0
+        // Anchor the status dot to "그"'s right edge (not the icon's far
+        // right) so the dot visually belongs to the top glyph instead of
+        // floating off in space. The bitmap then sizes to whichever is
+        // wider — the glyph area or the dot's right extent.
+        let dotDiameter: CGFloat = 5.5
+        let dotGap: CGFloat = 1.5      // visual gap between "그" and the dot
+        let glyphAreaWidth = contentWidth + horizontalPadding * 2
+        let topX = (glyphAreaWidth - topSize.width) / 2
+        let bottomX = (glyphAreaWidth - bottomSize.width) / 2
+        let dotX = topX + topSize.width + dotGap
         let imageSize = NSSize(
-            width: ceil(contentWidth + horizontalPadding * 2 + extraRightSpace),
+            width: ceil(max(glyphAreaWidth, dotX + dotDiameter + 0.5)),
             height: ceil(contentHeight)
         )
 
@@ -215,11 +238,7 @@ final class StatusItemController: NSObject {
 
         NSGraphicsContext.saveGraphicsState()
         NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
-        // Center glyphs in the original glyph area (excluding the reserved
-        // dot space) so they don't shift when the active state flips.
-        let glyphAreaWidth = contentWidth + horizontalPadding * 2
-        let topX = (glyphAreaWidth - topSize.width) / 2
-        let bottomX = (glyphAreaWidth - bottomSize.width) / 2
+
         // 그 gets fake-bold via sub-pixel overlay; 적 draws once (regular weight).
         let boldOffsets: [CGPoint] = [.zero, CGPoint(x: 0.5, y: 0), CGPoint(x: 0, y: 0.5), CGPoint(x: 0.5, y: 0.5)]
         for off in boldOffsets {
@@ -227,19 +246,36 @@ final class StatusItemController: NSObject {
         }
         ("적" as NSString).draw(at: NSPoint(x: bottomX, y: bottomY), withAttributes: bottomAttrs)
 
-        // Active indicator dot — top-right corner.
-        // Red = focused (shortcuts work) / Gray = unfocused (need to click in).
-        if active {
-            let dotRect = NSRect(
-                x: imageSize.width - dotDiameter - 0.5,
-                y: imageSize.height - dotDiameter - 1,
-                width: dotDiameter,
-                height: dotDiameter
-            )
-            let dotColor: NSColor = focused
-                ? NSColor(red: 1.0, green: 0.13, blue: 0.13, alpha: 1.0)
-                : NSColor(white: 0.6, alpha: 0.85)
-            dotColor.setFill()
+        // Status dot — top-right corner. Color is constant (brand red); shape
+        // changes with state so users learn one thing about color and one
+        // about shape.
+        let accent = NSColor(red: 1.0, green: 0.13, blue: 0.13, alpha: 1.0)
+        let dotRect = NSRect(
+            x: dotX,
+            y: imageSize.height - dotDiameter - 1,
+            width: dotDiameter,
+            height: dotDiameter
+        )
+        if !active {
+            // Idle: red outline at the same diameter as the filled active
+            // dot — a clean small ring that matches the active state's
+            // physical footprint exactly (no size compensation, no clipping).
+            accent.setStroke()
+            // Inset by half the line width so the stroke doesn't extend
+            // outside dotRect and clip against the bitmap edge.
+            let lineW: CGFloat = 1.2
+            let path = NSBezierPath(ovalIn: dotRect.insetBy(dx: lineW / 2,
+                                                              dy: lineW / 2))
+            path.lineWidth = lineW
+            path.stroke()
+        } else if focused {
+            // Active + focused: filled red. Shortcuts will fire.
+            accent.setFill()
+            NSBezierPath(ovalIn: dotRect).fill()
+        } else {
+            // Active but our app lost focus: muted gray fill. Drawing mode
+            // is still on, but ⌃G shortcuts are dispatching to another app.
+            NSColor(white: 0.6, alpha: 0.85).setFill()
             NSBezierPath(ovalIn: dotRect).fill()
         }
         NSGraphicsContext.restoreGraphicsState()

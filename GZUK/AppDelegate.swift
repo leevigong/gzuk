@@ -15,7 +15,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         registerBundledFonts()
 
         statusItemController = StatusItemController(
-            onToggle: { [weak self] in self?.store.toggle() },
+            onToggle: { [weak self] in
+                guard let self else { return }
+                // Clicking the menubar icon to TURN ON drawing means
+                // "start here" — discard any saved drag position so the
+                // toolbar lands on the cursor's monitor. ⌃G doesn't take
+                // this path, so its stored-position behavior is preserved.
+                if !self.store.isDrawing {
+                    ToolbarPositionStore.clear()
+                }
+                self.store.toggle()
+            },
             onSettings: { [weak self] in self?.settingsController.show() })
 
         overlayController = OverlayWindowController(store: store)
@@ -26,9 +36,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         hotkeyManager = HotkeyManager()
         hotkeyManager?.register { [weak self] in
             guard let self else { return }
-            // If drawing mode is already on but we lost focus to another app
-            // (gray dot state), pull focus back instead of toggling off.
-            // Otherwise behave as a normal toggle.
+            // If drawing mode is already on but we lost focus to another
+            // app (gray dot state), pull focus back instead of toggling
+            // off. The toolbar STAYS where the session started — moving
+            // it on every reclaim would jerk the UI around when the user
+            // is just briefly visiting another monitor.
             if self.store.isDrawing && !NSApp.isActive {
                 self.overlayController?.reclaimFocus()
             } else {
@@ -99,7 +111,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 self.store.toggleWhiteboard(); return nil
             case (mKey, []):
                 self.store.toggleToolbarCollapsed(); return nil
-            case (deleteKey, .command):
+            case (deleteKey, .control):
                 self.store.clear(); return nil
             #if DEBUG
             case (sKey, [.control, .shift]):

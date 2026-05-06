@@ -16,4 +16,12 @@ enum ToolbarPositionStore {
               let y = dict["y"] as? Double else { return nil }
         return CGPoint(x: x, y: y)
     }
+
+    /// Forget the saved drag position. Called when the user explicitly
+    /// "starts here" by clicking the menubar icon — that intent should
+    /// override whatever stale position was saved from a previous session
+    /// on a different monitor.
+    static func clear() {
+        UserDefaults.standard.removeObject(forKey: key)
+    }
 }

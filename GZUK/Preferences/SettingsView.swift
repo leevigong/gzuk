@@ -123,7 +123,7 @@ private struct ShortcutsTab: View {
                           systemImage: "arrow.uturn.forward")
                 }
                 LabeledContent {
-                    KeyCap("⌘ ⌫")
+                    KeyCap("⌃ ⌫")
                 } label: {
                     Label(L.t("모두 지우기", "Clear all"),
                           systemImage: "trash")

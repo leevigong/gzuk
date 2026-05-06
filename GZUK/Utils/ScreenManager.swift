@@ -8,6 +8,16 @@ protocol ScreenLike: AnyObject {
 
 extension NSScreen: ScreenLike {}
 
+extension NSScreen {
+    /// Stable per-physical-display identifier. Used to keep separate drawing
+    /// canvases per monitor so moving between displays doesn't drag old
+    /// strokes onto a new screen.
+    var displayID: CGDirectDisplayID {
+        let key = NSDeviceDescriptionKey("NSScreenNumber")
+        return (deviceDescription[key] as? NSNumber)?.uint32Value ?? 0
+    }
+}
+
 enum ScreenManager {
     /// Returns the screen whose frame contains the given point, or nil.
     static func screen(at point: CGPoint, in screens: [ScreenLike]) -> ScreenLike? {
