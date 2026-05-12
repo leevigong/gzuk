@@ -5,9 +5,10 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        // Pretendard for body — the de-facto Korean web font, mirrors Apple's
-        // SF Pro feel on Mac. Loaded via <link> in layout.tsx.
+        // Gowun Dodum (Korean handwriting) used as the default body font
+        // throughout the site. Loaded via Google Fonts <link> in layout.tsx.
         sans: [
+          "Gowun Dodum",
           "Pretendard Variable",
           "Pretendard",
           "-apple-system",
@@ -15,8 +16,19 @@ const config: Config = {
           "system-ui",
           "sans-serif",
         ],
-        // Gowun Dodum (Korean handwriting) — used only for the brand wordmark.
-        brand: ["var(--font-gowun-dodum)", "system-ui", "sans-serif"],
+        // Same family — kept as an alias for the wordmark.
+        brand: ["Gowun Dodum", "system-ui", "sans-serif"],
+        // Sharp Pretendard, used to opt small UI labels (e.g. the shortcuts
+        // table header with its gray background) out of the handwriting
+        // font when the handwriting feels too soft for tabular labels.
+        ui: [
+          "Pretendard Variable",
+          "Pretendard",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "system-ui",
+          "sans-serif",
+        ],
       },
       colors: {
         accent: {
@@ -35,8 +47,8 @@ const config: Config = {
         tightest: "-0.04em",
       },
       fontSize: {
-        display: ["clamp(3.5rem, 9vw, 7rem)", { lineHeight: "0.95", letterSpacing: "-0.04em", fontWeight: "700" }],
-        section: ["clamp(2.25rem, 5vw, 3.75rem)", { lineHeight: "1.05", letterSpacing: "-0.03em", fontWeight: "700" }],
+        display: ["clamp(1.125rem, 2vw, 1.75rem)", { lineHeight: "1.25", letterSpacing: "-0.02em", fontWeight: "700" }],
+        section: ["clamp(1.5rem, 3vw, 2.25rem)", { lineHeight: "1.15", letterSpacing: "-0.02em", fontWeight: "700" }],
       },
       maxWidth: {
         prose: "42rem",

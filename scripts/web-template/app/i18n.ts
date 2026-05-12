@@ -22,6 +22,13 @@ export const strings = {
     cta_github: { ko: "GitHub 에서 보기", en: "View on GitHub" },
   },
 
+  demo: {
+    hint:  { ko: "여기에 직접 그려보세요 ✏️", en: "Try drawing here ✏️" },
+    clear: { ko: "RESET",                    en: "RESET" },
+    note_pre:  { ko: "더 많은 도구는", en: "More tools —" },
+    note_link: { ko: "지금 설치 →",    en: "install now →" },
+  },
+
   features: {
     eyebrow: { ko: "기능", en: "Features" },
     title:   { ko: "필요한 만큼.", en: "Everything you need." },

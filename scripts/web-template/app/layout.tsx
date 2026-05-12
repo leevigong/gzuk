@@ -1,16 +1,5 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Gowun_Dodum } from "next/font/google";
-
-// Korean handwriting font — only used for the 그려/적어 brand wordmark so the
-// rest of the page can lean on a clean modern sans (Pretendard) for that
-// Apple-marketing-page feel.
-const gowun = Gowun_Dodum({
-  subsets: ["latin"],
-  weight: "400",
-  variable: "--font-gowun-dodum",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "그려적어 (GZUK) — 화면 위에 바로 그리고 적는 macOS 앱",
@@ -27,14 +16,38 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className={gowun.variable}>
+    <html lang="ko">
       <head>
         {/* Pretendard — Korean web font that gives an Apple-SF-Pro feel on
             both Mac and other platforms. Loading the variable build keeps
             bundle weight low while exposing the full weight axis. */}
         <link
+          rel="preconnect"
+          href="https://cdn.jsdelivr.net"
+          crossOrigin=""
+        />
+        <link
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"
+        />
+        {/* Gowun Dodum — Korean handwriting font, used only for the 그려/적어
+            brand wordmark. We load it via Google Fonts CSS rather than
+            next/font so the Korean unicode-range slice is fetched as soon
+            as the browser sees the Korean glyphs (next/font's `subsets:
+            ["latin"]` was excluding the Korean range, leaving 그려/적어 in
+            a system fallback that rendered at a different size). */}
+        <link
+          rel="preconnect"
+          href="https://fonts.googleapis.com"
+        />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin=""
+        />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap"
         />
       </head>
       <body className="font-sans antialiased">{children}</body>

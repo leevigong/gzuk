@@ -26,6 +26,13 @@ body {
   word-break: keep-all;
 }
 
+/* Tailwind's preflight resets common form-element fonts but leaves kbd/code/
+   pre/samp on the browser-default monospace stack. Force them to inherit
+   so the page's chosen body font (Gowun Dodum) applies everywhere. */
+kbd, code, samp, pre {
+  font-family: inherit;
+}
+
 /* Subtle fade+rise reveal for sections — triggered by IntersectionObserver
    in page.tsx. Apple's pages use this exact "comes into view then settles"
    feel. */
@@ -38,3 +45,16 @@ body {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* Gentle breathing for the demo hint — Tailwind's animate-pulse drops to
+   50% which makes Korean text hard to read; this stays in a comfortable
+   88–100% range so it draws the eye without ghosting. Opacity-only so it
+   doesn't fight Tailwind's transform utilities on the same element. */
+@keyframes gzukBreathe {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.88; }
+}
+.gzuk-breathe {
+  animation: gzukBreathe 2.4s ease-in-out infinite;
+}
+
