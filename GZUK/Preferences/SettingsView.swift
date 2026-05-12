@@ -71,13 +71,20 @@ private struct GeneralTab: View {
 private struct ShortcutsTab: View {
     var body: some View {
         Form {
-            Section(L.t("전역", "Global")) {
+            Section {
                 LabeledContent {
-                    KeyCap("⌃ G")
+                    KeyCap("⌥G")
                 } label: {
                     Label(L.t("그리기 모드 토글", "Toggle drawing mode"),
                           systemImage: "paintbrush.pointed")
                 }
+            } header: {
+                Text(L.t("전역", "Global"))
+            } footer: {
+                Text(L.t("어디서든 ⌥G로 그리기 모드를 켜고 끌 수 있어요.",
+                         "Press ⌥G anywhere to toggle drawing mode."))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
 
             Section(L.t("도구", "Tools")) {
@@ -133,6 +140,7 @@ private struct ShortcutsTab: View {
         .formStyle(.grouped)
         .scrollContentBackground(.hidden)
     }
+
 }
 
 // MARK: - KeyCap

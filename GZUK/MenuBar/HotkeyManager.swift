@@ -1,15 +1,14 @@
-import HotKey
 import AppKit
+import HotKey
 
+/// Registers ⌥G as a global hotkey via Carbon RegisterEventHotKey (no
+/// Accessibility permission required).
 final class HotkeyManager {
     private var hotkey: HotKey?
 
-    /// Registers ⌃G and calls `onTrigger` when it fires.
     func register(onTrigger: @escaping () -> Void) {
-        hotkey = HotKey(key: .g, modifiers: [.control])
-        hotkey?.keyDownHandler = {
-            onTrigger()
-        }
+        hotkey = HotKey(key: .g, modifiers: [.option])
+        hotkey?.keyDownHandler = onTrigger
     }
 
     func unregister() {

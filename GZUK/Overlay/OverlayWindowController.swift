@@ -54,7 +54,9 @@ final class OverlayWindowController {
     }
 
     /// Bring our app to the foreground and re-key the cursor's screen window
-    /// so the local key monitor and canvas keystrokes resume.
+    /// so the local key monitor and canvas keystrokes resume. Used when the
+    /// user fires the global toggle hotkey while drawing is already on but
+    /// another app stole focus (cursor passthrough).
     func reclaimFocus() {
         guard !windows.isEmpty else { return }
         NSApp.activate(ignoringOtherApps: true)

@@ -76,7 +76,7 @@ export const strings = {
       key:    { ko: "단축키",   en: "Shortcut" },
     },
     rows: [
-      { a: { ko: "그리기 토글 (전역)", en: "Toggle drawing (global)" }, k: "⌃G" },
+      { a: { ko: "그리기 토글 (전역)", en: "Toggle drawing (global)" }, k: "⌥G" },
       { a: { ko: "펜",                 en: "Pen" },                     k: "P" },
       { a: { ko: "형광펜",             en: "Highlighter" },             k: "H" },
       { a: { ko: "직선",               en: "Line" },                    k: "L" },

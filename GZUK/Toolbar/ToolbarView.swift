@@ -76,7 +76,7 @@ private struct ExpandedToolbarView: View {
                         .frame(width: 28, height: 28)
                         .foregroundStyle(.secondary)
                 }.buttonStyle(.plain)
-                    .tooltip(L.t("닫기 (⌃G)", "Close (⌃G)"))
+                    .tooltip(L.t("닫기 (⌥G)", "Close (⌥G)"))
             }
 
             // Visual grip indicator at the bottom — actual drag is handled

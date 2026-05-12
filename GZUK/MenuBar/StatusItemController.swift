@@ -129,18 +129,17 @@ final class StatusItemController: NSObject {
                                                             dark: dark)
     }
 
-    /// Hover label. Active/idle states are kept terse; the unfocused state is
-    /// the only one that needs to teach the ⌃G trick, since users would
-    /// otherwise be stuck wondering why shortcuts stopped firing. Pass-through
-    /// (cursor) mode gets its own label so "그리는 중" doesn't lie about what
-    /// clicks are actually doing.
+    /// Hover label. Active/idle states are kept terse; the unfocused state
+    /// teaches the double-tap-modifier trick so users aren't stuck wondering
+    /// why shortcuts stopped firing. Pass-through (cursor) mode gets its own
+    /// label so "그리는 중" doesn't lie about what clicks are actually doing.
     private static func tooltip(active: Bool, passthrough: Bool, focused: Bool) -> String {
         if !active {
-            return L.t("그려적어 (⌃G)", "그려적어 (⌃G)")
+            return L.t("그려적어 (⌥G)", "그려적어 (⌥G)")
         }
         if !focused {
-            return L.t("포커스 잃음 — ⌃G 로 회수",
-                       "No focus — ⌃G to reclaim")
+            return L.t("포커스 잃음 — ⌥G로 회수",
+                       "No focus — ⌥G to reclaim")
         }
         if passthrough {
             return L.t("커서 모드", "Cursor mode")
@@ -313,15 +312,15 @@ final class StatusItemController: NSObject {
 
     private func showMenu() {
         let menu = NSMenu()
-        let settings = NSMenuItem(title: L.t("설정…", "Settings…"),
+        let settings = NSMenuItem(title: L.t("설정", "Settings"),
                                   action: #selector(openSettings),
-                                  keyEquivalent: ",")
+                                  keyEquivalent: "")
         settings.target = self
         menu.addItem(settings)
         menu.addItem(.separator())
-        menu.addItem(NSMenuItem(title: L.t("그려적어 종료", "Quit GZUK"),
+        menu.addItem(NSMenuItem(title: L.t("종료", "Quit"),
                                 action: #selector(NSApplication.terminate(_:)),
-                                keyEquivalent: "q"))
+                                keyEquivalent: ""))
         statusItem.menu = menu
         menuShowing = true
         // performClick blocks until the menu is dismissed.
