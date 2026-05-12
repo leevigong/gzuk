@@ -8,5 +8,11 @@
 	<string>그려적어</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.graphics-design</string>
+	<key>SUFeedURL</key>
+	<string>https://gzuk-app.vercel.app/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>DYABf1zSamXIGl9yXR5TeaNWKGaZ4JNd5GXAU9LX14E=</string>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
 </dict>
 </plist>

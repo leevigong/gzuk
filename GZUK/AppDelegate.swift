@@ -1,8 +1,9 @@
 import Cocoa
 import CoreText
 import Observation
+import Sparkle
 
-final class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
     private let store = DrawingStore()
     private let settingsController = SettingsWindowController()
     private var statusItemController: StatusItemController?
@@ -10,9 +11,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var overlayController: OverlayWindowController?
     private var toolbarController: ToolbarWindowController?
     private var keyMonitor: Any?
+    private var updaterController: SPUStandardUpdaterController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         registerBundledFonts()
+
+        // Sparkle: feed URL + EdDSA public key live in Info.plist. We use
+        // EdDSA verification (not Developer ID) because the app is ad-hoc
+        // signed. Auto-check fires on schedule; users can also pull-check
+        // from the menubar item.
+        updaterController = SPUStandardUpdaterController(
+            startingUpdater: true,
+            updaterDelegate: self,
+            userDriverDelegate: nil
+        )
+        // Silent check ~3s after launch so the "update available" badge in
+        // the right-click menu is correct from the user's first menu open
+        // instead of waiting for the next 24h scheduled check.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
+            self?.updaterController?.updater.checkForUpdateInformation()
+        }
 
         statusItemController = StatusItemController(
             onToggle: { [weak self] in
@@ -26,7 +44,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 }
                 self.store.toggle()
             },
-            onSettings: { [weak self] in self?.settingsController.show() })
+            onSettings: { [weak self] in self?.settingsController.show() },
+            onCheckForUpdates: { [weak self] in
+                self?.updaterController?.checkForUpdates(nil)
+            })
 
         overlayController = OverlayWindowController(store: store)
         toolbarController = ToolbarWindowController(store: store) { [weak self] in
@@ -75,6 +96,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if let token = keyMonitor {
             NSEvent.removeMonitor(token)
             keyMonitor = nil
+        }
+    }
+
+    // MARK: - SPUUpdaterDelegate
+
+    func updater(_ updater: SPUUpdater, didFindValidUpdate item: SUAppcastItem) {
+        statusItemController?.setUpdateAvailable(true)
+    }
+
+    func updaterDidNotFindUpdate(_ updater: SPUUpdater) {
+        statusItemController?.setUpdateAvailable(false)
+    }
+
+    /// Sparkle doesn't refire didFindValidUpdate after the user dismisses the
+    /// alert, so clear the menubar badge here when the user explicitly opts
+    /// out of this version (skip) or defers it (dismiss). Install causes the
+    /// app to restart at the new version, which naturally clears the badge.
+    func updater(_ updater: SPUUpdater, userDidMake choice: SPUUserUpdateChoice, forUpdate updateItem: SUAppcastItem, state: SPUUserUpdateState) {
+        switch choice {
+        case .skip, .dismiss:
+            statusItemController?.setUpdateAvailable(false)
+        case .install:
+            break
+        @unknown default:
+            break
         }
     }
 

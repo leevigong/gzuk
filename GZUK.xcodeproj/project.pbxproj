@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		38C68FD12FA49E5500639B0D /* HotKey in Frameworks */ = {isa = PBXBuildFile; productRef = 38C68FD02FA49E5500639B0D /* HotKey */; };
+		ABCDEF0123456789ABCDEF01 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = ABCDEF0123456789ABCDEF02 /* Sparkle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,6 +71,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				38C68FD12FA49E5500639B0D /* HotKey in Frameworks */,
+				ABCDEF0123456789ABCDEF01 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -131,6 +133,7 @@
 			name = GZUK;
 			packageProductDependencies = (
 				38C68FD02FA49E5500639B0D /* HotKey */,
+				ABCDEF0123456789ABCDEF02 /* Sparkle */,
 			);
 			productName = GZUK;
 			productReference = 38C68F912FA49B1000639B0D /* GZUK.app */;
@@ -217,6 +220,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				38C68FCF2FA49E5500639B0D /* XCRemoteSwiftPackageReference "HotKey" */,
+				ABCDEF0123456789ABCDEF03 /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 38C68F922FA49B1000639B0D /* Products */;
@@ -417,9 +421,8 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				ENABLE_APP_SANDBOX = YES;
-				ENABLE_USER_SELECTED_FILES = readonly;
+				CURRENT_PROJECT_VERSION = 2;
+				ENABLE_APP_SANDBOX = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = GZUK/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "그려적어";
@@ -433,7 +436,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.leevigong.GZUK;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -453,9 +456,8 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				ENABLE_APP_SANDBOX = YES;
-				ENABLE_USER_SELECTED_FILES = readonly;
+				CURRENT_PROJECT_VERSION = 2;
+				ENABLE_APP_SANDBOX = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = GZUK/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "그려적어";
@@ -469,7 +471,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.leevigong.GZUK;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -487,10 +489,10 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.leevigong.GZUKTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -507,10 +509,10 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.leevigong.GZUKTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -526,9 +528,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.leevigong.GZUKUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -544,9 +546,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.leevigong.GZUKUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -608,6 +610,14 @@
 				minimumVersion = 0.2.0;
 			};
 		};
+		ABCDEF0123456789ABCDEF03 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.6.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -615,6 +625,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 38C68FCF2FA49E5500639B0D /* XCRemoteSwiftPackageReference "HotKey" */;
 			productName = HotKey;
+		};
+		ABCDEF0123456789ABCDEF02 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = ABCDEF0123456789ABCDEF03 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
