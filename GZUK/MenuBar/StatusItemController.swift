@@ -4,11 +4,13 @@ final class StatusItemController: NSObject {
     private let statusItem: NSStatusItem
     private let onToggle: () -> Void
     private let onSettings: () -> Void
+    private let onCheckForUpdates: () -> Void
 
     private var isDrawing = false
     private var isPassthrough = false
     private var hovering = false
     private var menuShowing = false
+    private var updateAvailable = false
     private var globalMouseMonitor: Any?
     private var localMouseMonitor: Any?
     private var appearanceObservation: NSKeyValueObservation?
@@ -19,9 +21,11 @@ final class StatusItemController: NSObject {
     }
 
     init(onToggle: @escaping () -> Void,
-         onSettings: @escaping () -> Void) {
+         onSettings: @escaping () -> Void,
+         onCheckForUpdates: @escaping () -> Void) {
         self.onToggle = onToggle
         self.onSettings = onSettings
+        self.onCheckForUpdates = onCheckForUpdates
         self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         super.init()
 
@@ -117,6 +121,12 @@ final class StatusItemController: NSObject {
         isPassthrough = on
     }
 
+    /// Whether Sparkle found a new version. The right-click menu shows a
+    /// red dot next to "업데이트 확인" while this is true.
+    func setUpdateAvailable(_ available: Bool) {
+        updateAvailable = available
+    }
+
     @objc private func refreshIcon() {
         let focused = NSApp.isActive
         // Detect light vs dark menubar via the status item button's effective
@@ -160,6 +170,28 @@ final class StatusItemController: NSObject {
     /// in light) and `isTemplate = false` so the colored dot survives intact
     /// (template inversion would also visibly thin the fake-bold strokes on
     /// "그").
+    /// "Download available" badge — App Store-style downward arrow in a red
+    /// circle. Used as the leading image of the "업데이트 확인" menu item
+    /// when Sparkle has found a new version. Distinct from a plain dot so it
+    /// doesn't read as a radio-button selection indicator.
+    private static func makeUpdateBadgeImage() -> NSImage {
+        let config = NSImage.SymbolConfiguration(pointSize: 13, weight: .semibold)
+        let symbol = NSImage(systemSymbolName: "arrow.down.circle.fill",
+                             accessibilityDescription: "Update available")?
+            .withSymbolConfiguration(config)
+        guard let symbol else {
+            return NSImage(size: .zero)
+        }
+        let tinted = NSImage(size: symbol.size, flipped: false) { rect in
+            NSColor.systemRed.set()
+            symbol.draw(in: rect)
+            rect.fill(using: .sourceIn)
+            return true
+        }
+        tinted.isTemplate = false
+        return tinted
+    }
+
     private static func makeStatusBarImage(active: Bool, focused: Bool, dark: Bool) -> NSImage {
         let fontSize: CGFloat = 11
         let visualGap: CGFloat = 4           // visible space between glyph cap-tops
@@ -310,15 +342,29 @@ final class StatusItemController: NSObject {
         }
     }
 
+    @objc private func checkForUpdates() {
+        DispatchQueue.main.async { [weak self] in
+            self?.onCheckForUpdates()
+        }
+    }
+
     private func showMenu() {
         let menu = NSMenu()
-        let settings = NSMenuItem(title: L.t("설정", "Settings"),
+        let settings = NSMenuItem(title: L.t("  설정  ", "  Settings  "),
                                   action: #selector(openSettings),
                                   keyEquivalent: "")
         settings.target = self
         menu.addItem(settings)
+        let updates = NSMenuItem(title: L.t("  업데이트 확인  ", "  Check for Updates  "),
+                                 action: #selector(checkForUpdates),
+                                 keyEquivalent: "")
+        updates.target = self
+        if updateAvailable {
+            updates.image = Self.makeUpdateBadgeImage()
+        }
+        menu.addItem(updates)
         menu.addItem(.separator())
-        menu.addItem(NSMenuItem(title: L.t("종료", "Quit"),
+        menu.addItem(NSMenuItem(title: L.t("  종료  ", "  Quit  "),
                                 action: #selector(NSApplication.terminate(_:)),
                                 keyEquivalent: ""))
         statusItem.menu = menu

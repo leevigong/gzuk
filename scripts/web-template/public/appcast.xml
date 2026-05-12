@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     version="2.0">
+  <channel>
+    <title>그려적어 (GZUK)</title>
+    <link>https://gzuk-app.vercel.app/appcast.xml</link>
+    <description>Most recent updates of GZUK</description>
+    <language>en</language>
+
+    <item>
+      <title>1.0.1</title>
+      <pubDate>Tue, 12 May 2026 20:00:00 +0900</pubDate>
+      <sparkle:version>1</sparkle:version>
+      <sparkle:shortVersionString>1.0.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[
+        <ul>
+          <li>글로벌 단축키를 ⌥G로 변경 (이전: ⌃G — 에디터/브라우저의 "다음 찾기" 손버릇과 충돌). 접근성 권한 불필요.</li>
+          <li>메뉴바의 "설정" / "종료" 항목 단축키(⌘, / ⌘Q) 제거 + 라벨 단축.</li>
+          <li>Sparkle 자동 업데이트 추가 — 다음 버전부터 본 알림으로 업데이트 가능.</li>
+        </ul>
+      ]]></description>
+      <enclosure url="https://github.com/leevigong/gzuk/releases/download/v1.0.1/gzuk-1.0.1.dmg"
+                 sparkle:version="1"
+                 sparkle:shortVersionString="1.0.1"
+                 length="1861006"
+                 type="application/octet-stream"
+                 sparkle:edSignature="g7LxJvrvNV6/oNQzmQ3+XIyFNrYtwmO7LK5mJUHPLIcMJouspdmdgvBE1jORID/ah+VPMSmyXIQcdJwdzUq6AQ==" />
+    </item>
+  </channel>
+</rss>
