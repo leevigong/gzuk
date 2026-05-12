@@ -2,9 +2,13 @@
 
 > [🇺🇸 English README](README.md)
 
+[![그려적어 GZUK](https://github.com/user-attachments/assets/b5a7e55e-d7f4-42a4-b8c2-0e1ae854a63e)](https://gzuk-app.vercel.app)
+
 화면 위에 바로, 그리고 적어요.
-어떤 macOS 화면이든 `⌃G` 한 번이면 어노테이션이 시작됩니다 — 회의, 강의,
+어떤 macOS 화면이든 `⌥G` 한 번이면 어노테이션이 시작됩니다 — 회의, 강의,
 데모, 코드 리뷰.
+
+Dock 아이콘 없는 메뉴바 앱이에요. 부를 때까지 거슬리지 않게 떠있어요.
 
 → 자세한 소개와 데모: **https://gzuk-app.vercel.app**
 

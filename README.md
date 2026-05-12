@@ -2,9 +2,14 @@
 
 > [🇰🇷 한국어 README](README.ko.md)
 
+[![그려적어 GZUK](https://github.com/user-attachments/assets/b5a7e55e-d7f4-42a4-b8c2-0e1ae854a63e)](https://gzuk-app.vercel.app)
+
 Draw and write directly on top of any macOS screen.
-One `⌃G` and any window becomes a canvas — meetings, lectures, demos,
+One `⌥G` and any window becomes a canvas — meetings, lectures, demos,
 code reviews.
+
+Runs as a menubar app — no Dock icon, no window of its own. Stays out of
+the way until you summon it.
 
 → Full overview and demo: **https://gzuk-app.vercel.app**
 
