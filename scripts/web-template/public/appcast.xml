@@ -9,6 +9,25 @@
     <language>en</language>
 
     <item>
+      <title>1.0.3</title>
+      <pubDate>Tue, 19 May 2026 21:10:00 +0900</pubDate>
+      <sparkle:version>3</sparkle:version>
+      <sparkle:shortVersionString>1.0.3</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[
+        <ul>
+          <li>모두 지우기 단축키 변경: ⌃⌫ → ⌥⌫. macOS 표준 "줄 앞까지 삭제"와 충돌해서 옵션+딜리트로 옮겼어요.</li>
+        </ul>
+      ]]></description>
+      <enclosure url="https://github.com/leevigong/gzuk/releases/download/v1.0.3/gzuk-1.0.3.dmg"
+                 sparkle:version="3"
+                 sparkle:shortVersionString="1.0.3"
+                 length="2731617"
+                 type="application/octet-stream"
+                 sparkle:edSignature="XPAoEZHWzOewlYo9wlgj+GGnzFee+bFNYac2x+lMHmhsYYlG43/GQa5QYywawDfbiYItoME5jEydgZ3iDT+VCg==" />
+    </item>
+
+    <item>
       <title>1.0.2</title>
       <pubDate>Tue, 12 May 2026 22:30:00 +0900</pubDate>
       <sparkle:version>2</sparkle:version>
