@@ -157,7 +157,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
                 self.store.toggleWhiteboard(); return nil
             case (mKey, []):
                 self.store.toggleToolbarCollapsed(); return nil
-            case (deleteKey, .control):
+            case (deleteKey, .option):
                 self.store.clear(); return nil
             #if DEBUG
             case (sKey, [.control, .shift]):

@@ -61,7 +61,7 @@ private struct ExpandedToolbarView: View {
                         .font(.system(size: 16, weight: .medium))
                         .frame(width: 28, height: 28)
                 }.buttonStyle(.plain)
-                    .tooltip(L.t("모두 지우기 (⌃⌫)", "Clear all (⌃⌫)"))
+                    .tooltip(L.t("모두 지우기 (⌥⌫)", "Clear all (⌥⌫)"))
                 Button { store.toggleToolbarCollapsed() } label: {
                     Image(systemName: "arrow.down.right.and.arrow.up.left")
                         .font(.system(size: 13, weight: .medium))
