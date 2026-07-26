@@ -140,7 +140,10 @@ final class DrawingCanvasView: NSView, NSTextFieldDelegate {
             inProgressPoints = []
 
         case .line, .arrow, .rectangle, .circle:
-            if let s = makePreviewShape() {
+            // A click with no drag would commit a zero-size shape, which the
+            // round line cap renders as a stray dot the user then has to
+            // erase. Treat anything under the threshold as a mis-click.
+            if isDragLongEnough, let s = makePreviewShape() {
                 store.commitShape(s)
             }
             dragStart = nil
@@ -150,6 +153,16 @@ final class DrawingCanvasView: NSView, NSTextFieldDelegate {
             break
         }
         needsDisplay = true
+    }
+
+    /// Minimum drag distance (points) before line/arrow/rect/circle commits.
+    /// Small enough that a deliberate short stroke still lands, large enough
+    /// to absorb the pointer jitter of an ordinary click.
+    private static let minDragDistance: CGFloat = 3
+
+    private var isDragLongEnough: Bool {
+        guard let a = dragStart, let b = dragCurrent else { return false }
+        return hypot(b.x - a.x, b.y - a.y) >= Self.minDragDistance
     }
 
     /// Build the preview shape for the current drag (or in-progress freehand).
