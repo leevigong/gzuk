@@ -117,20 +117,23 @@ private struct ShortcutsTab: View {
                     Label(L.t("툴바 접기 / 펼치기", "Minimize / expand toolbar"),
                           systemImage: "arrow.down.right.and.arrow.up.left")
                 }
+                // Only the ⌥ set is advertised. ⌘Z / ⌘⇧Z / ⌥⌫ still work
+                // (see AppDelegate.installKeyboardShortcuts) but stay
+                // undocumented so the ⌥D/⌥G/⌥Z cluster is what users learn.
                 LabeledContent {
-                    KeyCap("⌘ Z")
+                    KeyCap("⌥Z")
                 } label: {
                     Label(L.t("실행 취소", "Undo"),
                           systemImage: "arrow.uturn.backward")
                 }
                 LabeledContent {
-                    KeyCap("⌘ ⇧ Z")
+                    KeyCap("⌥⇧Z")
                 } label: {
                     Label(L.t("다시 실행", "Redo"),
                           systemImage: "arrow.uturn.forward")
                 }
                 LabeledContent {
-                    KeyCap("⌥ ⌫")
+                    KeyCap("⌥D")
                 } label: {
                     Label(L.t("모두 지우기", "Clear all"),
                           systemImage: "trash")

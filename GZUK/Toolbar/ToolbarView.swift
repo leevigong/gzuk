@@ -49,19 +49,19 @@ private struct ExpandedToolbarView: View {
                         .font(.system(size: 16, weight: .medium))
                         .frame(width: 28, height: 28)
                 }.buttonStyle(.plain)
-                    .tooltip(L.t("실행 취소 (⌘Z)", "Undo (⌘Z)"))
+                    .tooltip(L.t("실행 취소 (⌥Z)", "Undo (⌥Z)"))
                 Button { store.redo() } label: {
                     Image(systemName: "arrow.uturn.forward")
                         .font(.system(size: 16, weight: .medium))
                         .frame(width: 28, height: 28)
                 }.buttonStyle(.plain)
-                    .tooltip(L.t("다시 실행 (⌘⇧Z)", "Redo (⌘⇧Z)"))
+                    .tooltip(L.t("다시 실행 (⌥⇧Z)", "Redo (⌥⇧Z)"))
                 Button { store.clear() } label: {
                     Image(systemName: "trash")
                         .font(.system(size: 16, weight: .medium))
                         .frame(width: 28, height: 28)
                 }.buttonStyle(.plain)
-                    .tooltip(L.t("모두 지우기 (⌥⌫)", "Clear all (⌥⌫)"))
+                    .tooltip(L.t("모두 지우기 (⌥D)", "Clear all (⌥D)"))
                 Button { store.toggleToolbarCollapsed() } label: {
                     Image(systemName: "arrow.down.right.and.arrow.up.left")
                         .font(.system(size: 13, weight: .medium))

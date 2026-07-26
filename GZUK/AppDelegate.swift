@@ -132,6 +132,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         let sKey: UInt16 = 1
         let wKey: UInt16 = 13
         let mKey: UInt16 = 46
+        let dKey: UInt16 = 2
         let deleteKey: UInt16 = 51
 
         keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
@@ -145,9 +146,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
             let kc = event.keyCode
 
             switch (kc, mods) {
-            case (zKey, .command):
+            // ⌥ variants sit alongside the standard ⌘ ones: while drawing,
+            // the user's hand already rests on ⌥ for the other shortcuts, so
+            // reaching for ⌘ breaks the ⌥D/⌥G/⌥Z cluster.
+            case (zKey, .command), (zKey, .option):
                 self.store.undo(); return nil
-            case (zKey, [.command, .shift]):
+            case (zKey, [.command, .shift]), (zKey, [.option, .shift]):
                 self.store.redo(); return nil
             case (commaKey, .command):
                 self.store.requestSettings(); return nil
@@ -157,7 +161,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
                 self.store.toggleWhiteboard(); return nil
             case (mKey, []):
                 self.store.toggleToolbarCollapsed(); return nil
-            case (deleteKey, .option):
+            // ⌥D is the advertised one (same hand position as ⌥G); ⌥⌫ stays
+            // for muscle memory from 1.0.3 and earlier.
+            case (dKey, .option), (deleteKey, .option):
                 self.store.clear(); return nil
             #if DEBUG
             case (sKey, [.control, .shift]):

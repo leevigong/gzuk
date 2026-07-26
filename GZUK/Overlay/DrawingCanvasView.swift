@@ -318,7 +318,7 @@ final class DrawingCanvasView: NSView, NSTextFieldDelegate {
         field.frame = f
     }
 
-    // MARK: - Keyboard (Undo / Redo)
+    // MARK: - Keyboard
 
     override var acceptsFirstResponder: Bool { true }
 
@@ -327,29 +327,11 @@ final class DrawingCanvasView: NSView, NSTextFieldDelegate {
     /// swallowed by AppKit's "click-to-activate" behavior.
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 
-    override func keyDown(with event: NSEvent) {
-        let mods = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-        let chars = event.charactersIgnoringModifiers ?? ""
-        switch (chars, mods) {
-        case ("z", .command):
-            store.undo()
-        case ("z", [.command, .shift]):
-            store.redo()
-        case (",", .command):
-            // Standard macOS Settings shortcut. Needed because the overlay
-            // covers the screen and blocks right-clicks on the menu bar item.
-            store.requestSettings()
-        default:
-            // Single-letter tool shortcuts (P, H, L, A, R, C, T, N, E)
-            // — only when no modifier is held and no text field is editing.
-            if mods.isEmpty,
-               activeTextField == nil,
-               let char = chars.first,
-               let tool = Tool.allCases.first(where: { $0.hotkey == char }) {
-                store.setTool(tool)
-            } else {
-                super.keyDown(with: event)
-            }
-        }
-    }
+    // No keyDown override: every canvas shortcut (undo/redo, clear, tool
+    // letters, ⌘,) is handled by the app-wide monitor in
+    // AppDelegate.installKeyboardShortcuts(), which matches on hardware
+    // keyCodes so ⌥/IME-modified characters still resolve. Handling them
+    // here as well would be dead code — the monitor consumes the event
+    // before it ever reaches the responder chain — and the two copies would
+    // drift apart.
 }
