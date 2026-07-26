@@ -9,6 +9,29 @@
     <language>en</language>
 
     <item>
+      <title>1.0.4</title>
+      <pubDate>Sun, 26 Jul 2026 15:17:30 +0900</pubDate>
+      <sparkle:version>4</sparkle:version>
+      <sparkle:shortVersionString>1.0.4</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[
+        <ul>
+          <li>⌥G로 그리기 모드를 끄면 쓰던 창으로 포커스가 바로 돌아가요. 이제 원래 작업으로 넘어갈 때 마우스로 한 번 더 클릭하지 않아도 돼요.</li>
+          <li>모두 지우기에 ⌥D 추가 — 손을 ⌥에 올려둔 채로 누를 수 있어요. (기존 ⌥⌫도 그대로 동작해요.)</li>
+          <li>실행 취소·다시 실행을 ⌥Z / ⌥⇧Z로도 할 수 있어요. ⌥D, ⌥G와 같은 자리에서 손을 떼지 않고 쓰라고 추가했어요. (⌘Z, ⌘⇧Z도 그대로예요.)</li>
+          <li>선·화살표·사각형·원 도구에서 드래그 없이 클릭만 했을 때 점이 찍히던 문제를 고쳤어요. 이제 그냥 무시돼요.</li>
+          <li>툴바를 메뉴바 위까지 끌어올릴 수 있어요. 옮겨둔 위치는 M으로 접었다 펴도 그대로 유지돼요.</li>
+        </ul>
+      ]]></description>
+      <enclosure url="https://github.com/leevigong/gzuk/releases/download/v1.0.4/gzuk-1.0.4.dmg"
+                 sparkle:version="4"
+                 sparkle:shortVersionString="1.0.4"
+                 length="2737041"
+                 type="application/octet-stream"
+                 sparkle:edSignature="fp50EFZnm503Q70VswbEq88Jc9TEzl86uHILEy961QnW2Hm27f0f84DB8WN0noNB2BWK3a8YD3/BoOiUQCPHDA==" />
+    </item>
+
+    <item>
       <title>1.0.3</title>
       <pubDate>Tue, 19 May 2026 21:10:00 +0900</pubDate>
       <sparkle:version>3</sparkle:version>
