@@ -249,8 +249,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
             overlayController?.show()
             toolbarController?.show()
         } else {
-            overlayController?.hide()
+            // Toolbar first: it can become key, so it must be off screen
+            // before the overlay hands activation back to the user's app.
             toolbarController?.hide()
+            overlayController?.hide()
         }
     }
 }

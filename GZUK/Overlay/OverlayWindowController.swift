@@ -7,6 +7,11 @@ final class OverlayWindowController {
     /// commit to the same shape list and render across all of them.
     private var windows: [CGDirectDisplayID: OverlayWindow] = [:]
     private var screenChangeObserver: NSObjectProtocol?
+    /// Whoever was frontmost right before we stole activation. GZUK is an
+    /// LSUIElement app, so ordering our overlays out doesn't hand focus back
+    /// on its own — without this the user has to click their window before
+    /// typing again.
+    private var previousApp: NSRunningApplication?
 
     init(store: DrawingStore) {
         self.store = store
@@ -41,6 +46,7 @@ final class OverlayWindowController {
             spawnWindow(on: screen)
         }
 
+        rememberFrontmostApp()
         NSApp.activate(ignoringOtherApps: true)
         keyCursorScreenWindow()
     }
@@ -59,6 +65,9 @@ final class OverlayWindowController {
     /// another app stole focus (cursor passthrough).
     func reclaimFocus() {
         guard !windows.isEmpty else { return }
+        // The app we're taking focus from now is the one to give it back to
+        // on exit — not whoever was frontmost when the session started.
+        rememberFrontmostApp()
         NSApp.activate(ignoringOtherApps: true)
         keyCursorScreenWindow()
     }
@@ -68,7 +77,36 @@ final class OverlayWindowController {
             win.orderOut(nil)
         }
         windows.removeAll()
+        restorePreviousApp()
         // Note: store.shapes is preserved — restored on next show()
+    }
+
+    private func rememberFrontmostApp() {
+        guard let front = NSWorkspace.shared.frontmostApplication,
+              front.processIdentifier != ProcessInfo.processInfo.processIdentifier
+        else { return }
+        previousApp = front
+    }
+
+    /// Hand activation back to the app the user was working in. Skipped when
+    /// we aren't the active app anyway (the user already moved on — pulling
+    /// focus to a third app would be worse than doing nothing).
+    private func restorePreviousApp() {
+        let app = previousApp
+        previousApp = nil
+        guard NSApp.isActive else { return }
+        // Settings is still on screen (it's the only window of ours that can
+        // become main — the overlays are already ordered out and the toolbar
+        // can't). Pushing it behind the user's app would be worse.
+        guard !NSApp.windows.contains(where: { $0.isVisible && $0.canBecomeMain })
+        else { return }
+        if let app, !app.isTerminated {
+            app.activate()
+        } else {
+            // No target left (quit in the meantime) — at least step aside so
+            // we're not holding activation with nothing on screen.
+            NSApp.hide(nil)
+        }
     }
 
     /// Reconcile overlay windows with the currently connected displays:
