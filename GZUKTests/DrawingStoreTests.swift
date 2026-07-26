@@ -132,14 +132,14 @@ final class DrawingStoreTests: XCTestCase {
     func test_counter_startsAt1AndIncrementsOnCommit() {
         XCTAssertEqual(store.nextCounterNumber, 1)
         let c = Shape.counter(center: CGPoint(x: 10, y: 10),
-                              number: store.nextCounterNumber, color: .red)
+                              number: store.nextCounterNumber, color: .red, lineWidth: 4)
         store.commitShape(c)
         XCTAssertEqual(store.nextCounterNumber, 2)
     }
 
     func test_counter_undoDecrements() {
         let c = Shape.counter(center: .zero,
-                              number: store.nextCounterNumber, color: .red)
+                              number: store.nextCounterNumber, color: .red, lineWidth: 4)
         store.commitShape(c)
         XCTAssertEqual(store.nextCounterNumber, 2)
         store.undo()
@@ -148,7 +148,7 @@ final class DrawingStoreTests: XCTestCase {
 
     func test_counter_clearResetsTo1() {
         let c = Shape.counter(center: .zero,
-                              number: store.nextCounterNumber, color: .red)
+                              number: store.nextCounterNumber, color: .red, lineWidth: 4)
         store.commitShape(c)
         store.commitShape(c)
         store.clear()

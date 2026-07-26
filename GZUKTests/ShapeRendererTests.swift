@@ -74,7 +74,8 @@ final class ShapeRendererTests: XCTestCase {
     func test_counter_pathIsNonEmpty() {
         let shape = Shape.counter(center: CGPoint(x: 100, y: 100),
                                   number: 1,
-                                  color: .red)
+                                  color: .red,
+                                  lineWidth: 4)
         XCTAssertFalse(ShapeRenderer.path(for: shape).isEmpty)
     }
 }
