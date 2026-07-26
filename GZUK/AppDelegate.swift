@@ -25,11 +25,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
             updaterDelegate: self,
             userDriverDelegate: nil
         )
-        // Silent check ~3s after launch so the "update available" badge in
-        // the right-click menu is correct from the user's first menu open
-        // instead of waiting for the next 24h scheduled check.
+        // Check ~3s after launch. Background (not `checkForUpdateInformation`)
+        // so a waiting update actually surfaces: the silent variant only lit
+        // the menubar badge, which nobody sees until they right-click, and the
+        // scheduled check is 24h away. This variant stays quiet when there's
+        // nothing new and honours a skipped version, so it can't nag.
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
-            self?.updaterController?.updater.checkForUpdateInformation()
+            self?.updaterController?.updater.checkForUpdatesInBackground()
         }
 
         statusItemController = StatusItemController(
