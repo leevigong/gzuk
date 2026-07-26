@@ -25,6 +25,52 @@ final class ToolbarWindow: NSWindow {
         self.isMovable = true
         // Required for SwiftUI .help() tooltips to fire on hover.
         self.acceptsMouseMovedEvents = true
+
+        // Keep the level in sync with where the user parks the toolbar.
+        NotificationCenter.default.addObserver(
+            forName: NSWindow.didMoveNotification, object: self, queue: .main
+        ) { [weak self] _ in
+            self?.updateLevelForMenuBarOverlap()
+        }
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    /// Set once the user drags the toolbar (or a dragged position is restored
+    /// from a previous session). Tells the controller not to yank it back
+    /// under the menubar icon on collapse/expand.
+    var userHasRepositioned = false
+
+    /// Default level: above the overlay, below menubar popups, and at the
+    /// same level as Settings so neither traps the other.
+    private static let restingLevel =
+        NSWindow.Level(rawValue: NSWindow.Level.floating.rawValue + 1)
+    /// Above `.mainMenu` (24) so a toolbar parked in the menubar strip is
+    /// actually visible, still below `.popUpMenu` (101) so open menus win.
+    private static let aboveMenuBarLevel = NSWindow.Level.statusBar
+
+    /// AppKit's default pins a dragged window's top edge below the menu bar.
+    /// Return the rect untouched so the toolbar can be parked over the
+    /// menubar. The window can't be lost off-screen this way: `performDrag`
+    /// keeps the grabbed point under the cursor, which stays on a display.
+    override func constrainFrameRect(_ frameRect: NSRect, to screen: NSScreen?) -> NSRect {
+        frameRect
+    }
+
+    /// Only float above the menu bar while the toolbar actually overlaps it.
+    /// Staying at `.statusBar` permanently would cover other apps' menus even
+    /// when the toolbar sits nowhere near them.
+    func updateLevelForMenuBarOverlap() {
+        guard let screen = screen ?? NSScreen.main else { return }
+        let stripHeight = screen.frame.maxY - screen.visibleFrame.maxY
+        let strip = NSRect(x: screen.frame.minX, y: screen.visibleFrame.maxY,
+                           width: screen.frame.width, height: stripHeight)
+        let target = (stripHeight > 0 && frame.intersects(strip))
+            ? Self.aboveMenuBarLevel
+            : Self.restingLevel
+        if level != target { level = target }
     }
 
     // Borderless windows must override these to accept events.

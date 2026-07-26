@@ -42,9 +42,12 @@ final class ToolbarWindowController {
         // path explicitly clears the stored position before toggling, so
         // load() returns nil and we fall through to defaultOrigin (which
         // anchors to the cursor's monitor).
-        let origin = Self.onScreenOrigin(ToolbarPositionStore.load(), size: size)
-                  ?? defaultOrigin(for: size)
-        win.setFrameOrigin(origin)
+        let restored = Self.onScreenOrigin(ToolbarPositionStore.load(), size: size)
+        // A restored position came from a deliberate drag, so it outranks the
+        // menubar anchor on the next collapse/expand too.
+        win.userHasRepositioned = restored != nil
+        win.setFrameOrigin(restored ?? defaultOrigin(for: size))
+        win.updateLevelForMenuBarOverlap()
         win.orderFront(nil)
         self.window = win
 
@@ -83,12 +86,15 @@ final class ToolbarWindowController {
         // Force layout pass so fittingSize reflects the new SwiftUI tree.
         hosting.layoutSubtreeIfNeeded()
         let newSize = hosting.fittingSize
-        // Always re-anchor under the 그적 menubar icon on collapse/expand —
-        // matches the "popover-style" default position the user picked. If
-        // the anchor is unavailable, fall back to the toolbar's current
-        // center so we don't jump weirdly.
+        // Re-anchor under the 그적 menubar icon on collapse/expand — matches
+        // the "popover-style" default position. Skipped once the user has
+        // dragged the toolbar somewhere themselves: yanking it back would
+        // undo a deliberate placement (e.g. parked over the menubar) every
+        // time they hit M. In that case — and when the anchor is unavailable
+        // — keep the current top edge and re-center on the old midpoint so
+        // the size change doesn't jump.
         let origin: CGPoint
-        if anchorProvider() != nil {
+        if anchorProvider() != nil && !win.userHasRepositioned {
             origin = defaultOrigin(for: newSize)
         } else {
             let oldFrame = win.frame
@@ -98,6 +104,7 @@ final class ToolbarWindowController {
             )
         }
         win.setFrame(NSRect(origin: origin, size: newSize), display: true, animate: false)
+        win.updateLevelForMenuBarOverlap()
     }
 
     func hide() {
@@ -114,6 +121,7 @@ final class ToolbarWindowController {
         if Self.onScreenOrigin(win.frame.origin, size: win.frame.size) == nil {
             win.setFrameOrigin(defaultOrigin(for: win.frame.size))
         }
+        win.updateLevelForMenuBarOverlap()
     }
 
     /// Returns the origin unchanged if a window of the given size placed
@@ -123,7 +131,10 @@ final class ToolbarWindowController {
         guard let origin else { return nil }
         let center = CGPoint(x: origin.x + size.width / 2,
                              y: origin.y + size.height / 2)
-        let visible = NSScreen.screens.contains { $0.visibleFrame.contains(center) }
+        // Test against `frame`, not `visibleFrame`: a toolbar deliberately
+        // parked in the menubar strip is still perfectly on-screen, and
+        // visibleFrame would report it as stranded and snap it away.
+        let visible = NSScreen.screens.contains { $0.frame.contains(center) }
         return visible ? origin : nil
     }
 
