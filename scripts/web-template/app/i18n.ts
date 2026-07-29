@@ -57,8 +57,8 @@ export const strings = {
       {
         title: { ko: "한국어 IME 친화", en: "Korean-IME friendly" },
         body:  {
-          ko: "한글 입력 켜놔도 P/H/L/A/⌘Z 단축키 그대로 작동.",
-          en: "Tool shortcuts (P/H/L/A/⌘Z) keep working even with Korean IME on.",
+          ko: "한글 입력 켜놔도 P/H/L/A/⌥Z 단축키 그대로 작동.",
+          en: "Tool shortcuts (P/H/L/A/⌥Z) keep working even with Korean IME on.",
         },
       },
     ],
@@ -96,9 +96,9 @@ export const strings = {
       { a: { ko: "커서 (패스스루)",   en: "Cursor (pass-through)" },  k: "S" },
       { a: { ko: "화이트보드",         en: "Whiteboard" },              k: "W" },
       { a: { ko: "툴바 접기/펴기",      en: "Toggle toolbar" },          k: "M" },
-      { a: { ko: "되돌리기",           en: "Undo" },                    k: "⌘Z" },
-      { a: { ko: "다시하기",           en: "Redo" },                    k: "⌘⇧Z" },
-      { a: { ko: "전부 지우기",        en: "Clear all" },               k: "⌘⌫" },
+      { a: { ko: "되돌리기",           en: "Undo" },                    k: "⌥Z" },
+      { a: { ko: "다시하기",           en: "Redo" },                    k: "⌥⇧Z" },
+      { a: { ko: "전부 지우기",        en: "Clear all" },               k: "⌥D" },
       { a: { ko: "설정",               en: "Settings" },                k: "⌘," },
     ],
   },
