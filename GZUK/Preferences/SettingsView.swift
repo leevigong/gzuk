@@ -8,7 +8,7 @@ struct SettingsView: View {
             ShortcutsTab()
                 .tabItem { Label(L.t("단축키", "Shortcuts"), systemImage: "keyboard") }
         }
-        .frame(width: 440, height: 380)
+        .frame(width: 440, height: 520)
     }
 }
 
@@ -27,6 +27,42 @@ private struct GeneralTab: View {
                     Label(L.t("로그인 시 자동 실행", "Launch at login"),
                           systemImage: "power")
                 }
+            }
+
+            Section {
+                Toggle(isOn: Binding(
+                    get: { prefs.keepDrawingsOnExit },
+                    set: { prefs.setKeepDrawingsOnExit($0) })
+                ) {
+                    Label(L.t("그리기 모드를 꺼도 그림 유지",
+                              "Keep drawings after exiting"),
+                          systemImage: "pin")
+                }
+                Toggle(isOn: Binding(
+                    get: { prefs.outlineEnabled },
+                    set: { prefs.setOutlineEnabled($0) })
+                ) {
+                    Label(L.t("선 테두리", "Stroke outline"),
+                          systemImage: "circle.dashed")
+                }
+                LabeledContent {
+                    ColorPicker("", selection: Binding(
+                        get: { Color(nsColor: prefs.outlineColor) },
+                        set: { prefs.setOutlineColor(NSColor($0)) }),
+                                supportsOpacity: false)
+                        .labelsHidden()
+                } label: {
+                    Label(L.t("테두리 색상", "Outline color"),
+                          systemImage: "paintpalette")
+                }
+                .disabled(!prefs.outlineEnabled)
+            } header: {
+                Text(L.t("그리기", "Drawing"))
+            } footer: {
+                Text(L.t("그림을 유지하면 ⌥G로 나온 뒤에도 표시가 남고, 클릭은 아래 앱으로 그대로 전달돼요. 테두리는 새로 그리는 선부터 적용돼요.",
+                         "Kept drawings stay on screen after ⌥G and let clicks through to the app below. The outline applies to new strokes."))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
 
             Section(L.t("모양", "Appearance")) {
@@ -78,11 +114,17 @@ private struct ShortcutsTab: View {
                     Label(L.t("그리기 모드 토글", "Toggle drawing mode"),
                           systemImage: "paintbrush.pointed")
                 }
+                LabeledContent {
+                    KeyCap("⌥V")
+                } label: {
+                    Label(L.t("누르는 동안만 그리기", "Draw while held"),
+                          systemImage: "hand.point.up.left")
+                }
             } header: {
                 Text(L.t("전역", "Global"))
             } footer: {
-                Text(L.t("어디서든 ⌥G로 그리기 모드를 켜고 끌 수 있어요.",
-                         "Press ⌥G anywhere to toggle drawing mode."))
+                Text(L.t("어디서든 ⌥G로 그리기 모드를 켜고 끌 수 있어요. ⌥V는 누르고 있는 동안만 켜져요.",
+                         "Press ⌥G anywhere to toggle drawing mode. ⌥V turns it on only while held."))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }

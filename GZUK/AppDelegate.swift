@@ -4,13 +4,20 @@ import Observation
 import Sparkle
 
 final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
-    private let store = DrawingStore()
+    private let store = DrawingStore(outlineColor: {
+        PreferencesStore.shared.activeOutlineColor
+    })
     private let settingsController = SettingsWindowController()
     private var statusItemController: StatusItemController?
     private var hotkeyManager: HotkeyManager?
     private var overlayController: OverlayWindowController?
     private var toolbarController: ToolbarWindowController?
     private var keyMonitor: Any?
+    private var flagsMonitor: Any?
+    /// True while drawing mode is on only because ⌥V is held down; releasing
+    /// it ends the session. A session started any other way is never ended
+    /// by ⌥V.
+    private var isHoldSession = false
     private var updaterController: SPUStandardUpdaterController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -57,7 +64,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         }
 
         hotkeyManager = HotkeyManager()
-        hotkeyManager?.register { [weak self] in
+        hotkeyManager?.register(onToggle: { [weak self] in
             guard let self else { return }
             // If drawing mode is already on but we lost focus to another
             // app (gray dot state), pull focus back instead of toggling
@@ -69,9 +76,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
             } else {
                 self.store.toggle()
             }
-        }
+        }, onHoldBegan: { [weak self] in
+            self?.beginHoldSession()
+        }, onHoldEnded: { [weak self] in
+            self?.endHoldSession()
+        })
 
+        restorePenSettings()
+        observePenSettings()
+        // Custom colors join the "그려적어" color palette once drawn with.
+        store.onShapeCommitted = { [weak self] _ in
+            guard let self else { return }
+            PreferencesStore.shared.recordColorUse(
+                self.store.currentColor, presets: ColorPaletteView.presetColors)
+        }
         observeIsDrawing()
+        observeKeepDrawingsOnExit()
         observeIsPassthrough()
         installKeyboardShortcuts()
 
@@ -95,9 +115,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
     /// otherwise clicking the toolbar makes ToolbarWindow key and the canvas
     /// stops receiving keyDown.
     func applicationWillTerminate(_ notification: Notification) {
-        if let token = keyMonitor {
+        for token in [keyMonitor, flagsMonitor].compactMap({ $0 }) {
             NSEvent.removeMonitor(token)
-            keyMonitor = nil
+        }
+        keyMonitor = nil
+        flagsMonitor = nil
+    }
+
+    // MARK: - ⌥V hold-to-draw
+
+    private func beginHoldSession() {
+        // Already drawing (⌥G, menubar, or a key-repeat of this very press):
+        // leave that session alone so letting go doesn't end it.
+        guard !store.isDrawing else { return }
+        isHoldSession = true
+        store.toggle()
+    }
+
+    private func endHoldSession() {
+        guard isHoldSession else { return }
+        isHoldSession = false
+        if store.isDrawing {
+            store.toggle()
         }
     }
 
@@ -136,6 +175,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         let mKey: UInt16 = 46
         let dKey: UInt16 = 2
         let deleteKey: UInt16 = 51
+
+        // Letting go of ⌥ before V also ends a hold session — otherwise the
+        // hotkey's release would only come with V, and a user who lifts ⌥
+        // first would be left in drawing mode. We're the active app for the
+        // whole hold, so a local monitor sees it.
+        flagsMonitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
+            if self?.isHoldSession == true, !event.modifierFlags.contains(.option) {
+                self?.endHoldSession()
+            }
+            return event
+        }
 
         keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard let self else { return event }
@@ -220,6 +270,49 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         }
     }
 
+    // MARK: - Pen color / width persistence
+
+    private func restorePenSettings() {
+        let prefs = PreferencesStore.shared
+        if let color = prefs.drawingColor { store.setColor(color) }
+        if let width = prefs.drawingLineWidth { store.setLineWidth(width) }
+    }
+
+    /// Save color/width as they change. Kept here rather than in DrawingStore
+    /// so the store stays free of UserDefaults (tests build bare stores).
+    /// The tool is deliberately not saved: starting a session on the eraser
+    /// or counter would be more confusing than always starting on the pen.
+    private func observePenSettings() {
+        withObservationTracking {
+            _ = store.currentColor
+            _ = store.currentLineWidth
+        } onChange: { [weak self] in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                let prefs = PreferencesStore.shared
+                prefs.setDrawingColor(self.store.currentColor)
+                prefs.setDrawingLineWidth(self.store.currentLineWidth)
+                self.observePenSettings()
+            }
+        }
+    }
+
+    /// Turning "keep marks after exit" off while marks are lingering should
+    /// clear them off the screen right away, not at the next session.
+    private func observeKeepDrawingsOnExit() {
+        withObservationTracking {
+            _ = PreferencesStore.shared.keepDrawingsOnExit
+        } onChange: { [weak self] in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                if !PreferencesStore.shared.keepDrawingsOnExit {
+                    self.overlayController?.removeLingeringMarks()
+                }
+                self.observeKeepDrawingsOnExit()
+            }
+        }
+    }
+
     private func observeIsPassthrough() {
         withObservationTracking {
             _ = store.isPassthrough
@@ -259,8 +352,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         } else {
             // Toolbar first: it can become key, so it must be off screen
             // before the overlay hands activation back to the user's app.
+            // Ended by ⌥G / menubar mid-hold: the ⌥V release that follows
+            // must not count as a new toggle.
+            isHoldSession = false
             toolbarController?.hide()
-            overlayController?.hide()
+            overlayController?.hide(
+                keepVisible: PreferencesStore.shared.keepDrawingsOnExit)
         }
     }
 }

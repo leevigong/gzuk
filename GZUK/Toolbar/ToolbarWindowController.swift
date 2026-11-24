@@ -29,7 +29,7 @@ final class ToolbarWindowController {
     func show() {
         guard window == nil else { return }
 
-        let hosting = NSHostingView(rootView: ToolbarView(store: store))
+        let hosting = ToolbarHostingView(rootView: ToolbarView(store: store))
         let size = hosting.fittingSize
         let win = ToolbarWindow(contentSize: size)
         win.contentView = hosting
@@ -108,6 +108,7 @@ final class ToolbarWindowController {
     }
 
     func hide() {
+        CustomColorPanel.shared.close()
         if let w = window { ToolbarPositionStore.save(w.frame.origin) }
         window?.orderOut(nil)
         window = nil

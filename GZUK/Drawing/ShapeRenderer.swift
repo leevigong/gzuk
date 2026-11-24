@@ -32,6 +32,9 @@ enum ShapeRenderer {
 
         case .counter(let center, _, _, let lineWidth):
             return counterPath(center: center, lineWidth: lineWidth)
+
+        case .outlined(let base, _):
+            return path(for: base)
         }
     }
 
@@ -90,6 +93,53 @@ enum ShapeRenderer {
             ctx.setFillColor(NSColor.white.cgColor)
             ctx.addPath(translated)
             ctx.fillPath()
+
+        case .outlined(let base, let color):
+            drawOutline(of: base, color: color, in: ctx)
+            draw(base, in: ctx)
+        }
+    }
+
+    // MARK: - Outline
+
+    /// How far the border sticks out past the mark on each side. Scales with
+    /// weight so a thick stroke gets a visible rim and a thin one isn't
+    /// swallowed by it.
+    static func outlineInset(lineWidth: CGFloat) -> CGFloat {
+        max(1.5, lineWidth * 0.4)
+    }
+
+    /// Text has no line width; derive the rim from the glyph size instead.
+    static func outlineInset(font: NSFont) -> CGFloat {
+        max(1.5, font.pointSize * 0.08)
+    }
+
+    /// Paint the border underneath `base`. Strokes become a wider stroke in
+    /// the outline color; filled glyphs/badges get their edge stroked at twice
+    /// the inset (half of it is then covered by the fill drawn on top).
+    private static func drawOutline(of base: Shape, color: NSColor, in ctx: CGContext) {
+        switch base {
+        case .freehand(_, _, let w), .line(_, _, _, let w), .arrow(_, _, _, let w):
+            strokePath(path(for: base), in: ctx, color: color,
+                       lineWidth: w + outlineInset(lineWidth: w) * 2)
+
+        case .rectangle(_, _, let w, let filled), .circle(_, _, let w, let filled):
+            let inset = outlineInset(lineWidth: w)
+            strokePath(path(for: base), in: ctx, color: color,
+                       lineWidth: filled ? inset * 2 : w + inset * 2)
+
+        case .text(_, _, let font, _, _):
+            strokePath(path(for: base), in: ctx, color: color,
+                       lineWidth: outlineInset(font: font) * 2)
+
+        case .counter(_, _, _, let w):
+            strokePath(path(for: base), in: ctx, color: color,
+                       lineWidth: outlineInset(lineWidth: w) * 2)
+
+        case .highlighter, .outlined:
+            // Highlighter is translucent by design — a solid rim would defeat
+            // it. Nested outlines aren't produced (see DrawingStore.decorated).
+            break
         }
     }
 

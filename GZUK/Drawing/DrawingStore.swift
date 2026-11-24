@@ -34,6 +34,33 @@ final class DrawingStore {
     // In-progress freehand-style points before commit (pen/highlighter)
     private var inProgressPoints: [CGPoint] = []
 
+    /// Border color for new shapes, or nil for none. A closure rather than a
+    /// stored value so the store reads the live preference without owning
+    /// it (and tests get a plain, border-free store by default).
+    private let outlineColor: () -> NSColor?
+
+    /// Called after every committed shape (not on undo/redo/erase). Lets the
+    /// app record which colors are actually drawn with without the store
+    /// knowing about preferences.
+    @ObservationIgnored var onShapeCommitted: ((Shape) -> Void)?
+
+    init(outlineColor: @escaping () -> NSColor? = { nil }) {
+        self.outlineColor = outlineColor
+    }
+
+    /// `shape` as it will look once committed: wrapped in the current border
+    /// when one is set. Highlighter is left alone — it's translucent on
+    /// purpose. Idempotent, so passing an already-wrapped shape is harmless.
+    func decorated(_ shape: Shape) -> Shape {
+        guard let color = outlineColor() else { return shape }
+        switch shape {
+        case .highlighter, .outlined:
+            return shape
+        default:
+            return .outlined(base: shape, color: color)
+        }
+    }
+
     // MARK: - Mode toggle
 
     func toggle() {
@@ -113,11 +140,12 @@ final class DrawingStore {
     /// Pushes undo, clears redo, increments counter if applicable.
     func commitShape(_ shape: Shape) {
         pushUndoSnapshot()
-        shapes.append(shape)
-        if case .counter = shape {
+        shapes.append(decorated(shape))
+        if case .counter = shape.base {
             nextCounterNumber += 1
         }
         redoStack.removeAll()
+        onShapeCommitted?(shape)
     }
 
     // MARK: - Eraser

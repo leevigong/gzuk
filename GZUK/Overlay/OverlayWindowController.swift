@@ -12,6 +12,10 @@ final class OverlayWindowController {
     /// on its own — without this the user has to click their window before
     /// typing again.
     private var previousApp: NSRunningApplication?
+    /// False while the overlays are only displaying marks after drawing mode
+    /// ended (`hide(keepVisible: true)`): every window then ignores the mouse
+    /// so clicks reach the user's app, and nothing may take key status.
+    private var isInteractive = false
 
     init(store: DrawingStore) {
         self.store = store
@@ -35,17 +39,23 @@ final class OverlayWindowController {
     /// clicks on any other monitor's overlay still work via
     /// `acceptsFirstMouse` and naturally promote that window to key.
     func show() {
-        guard windows.isEmpty else { return }
-        let screens = NSScreen.screens
-        guard !screens.isEmpty else {
-            NSLog("GZUK: no screens available; aborting overlay")
-            return
+        if windows.isEmpty {
+            let screens = NSScreen.screens
+            guard !screens.isEmpty else {
+                NSLog("GZUK: no screens available; aborting overlay")
+                return
+            }
+            for screen in screens {
+                spawnWindow(on: screen)
+            }
         }
 
-        for screen in screens {
-            spawnWindow(on: screen)
+        // Either freshly spawned, or left on screen as a click-through
+        // display by `hide(keepVisible: true)` — make them drawable again.
+        isInteractive = true
+        for win in windows.values {
+            win.ignoresMouseEvents = store.isPassthrough
         }
-
         rememberFrontmostApp()
         NSApp.activate(ignoringOtherApps: true)
         keyCursorScreenWindow()
@@ -54,6 +64,7 @@ final class OverlayWindowController {
     /// Toggle pass-through (cursor) mode on every overlay simultaneously so
     /// behavior is uniform across monitors.
     func setPassthrough(_ on: Bool) {
+        guard isInteractive else { return }
         for win in windows.values {
             win.ignoresMouseEvents = on
         }
@@ -64,7 +75,7 @@ final class OverlayWindowController {
     /// user fires the global toggle hotkey while drawing is already on but
     /// another app stole focus (cursor passthrough).
     func reclaimFocus() {
-        guard !windows.isEmpty else { return }
+        guard isInteractive, !windows.isEmpty else { return }
         // The app we're taking focus from now is the one to give it back to
         // on exit — not whoever was frontmost when the session started.
         rememberFrontmostApp()
@@ -72,13 +83,34 @@ final class OverlayWindowController {
         keyCursorScreenWindow()
     }
 
-    func hide() {
+    /// End the drawing session. With `keepVisible` the marks stay on screen
+    /// as a click-through layer (nothing to show → windows go away as usual);
+    /// otherwise the overlays are removed. Either way store.shapes is kept and
+    /// comes back on the next show().
+    func hide(keepVisible: Bool = false) {
+        isInteractive = false
+        if keepVisible && !store.shapes.isEmpty {
+            for win in windows.values {
+                win.ignoresMouseEvents = true
+            }
+        } else {
+            removeWindows()
+        }
+        restorePreviousApp()
+    }
+
+    /// Drop a click-through display left by `hide(keepVisible: true)` — e.g.
+    /// when the user turns the setting off. No-op during a drawing session.
+    func removeLingeringMarks() {
+        guard !isInteractive else { return }
+        removeWindows()
+    }
+
+    private func removeWindows() {
         for win in windows.values {
             win.orderOut(nil)
         }
         windows.removeAll()
-        restorePreviousApp()
-        // Note: store.shapes is preserved — restored on next show()
     }
 
     private func rememberFrontmostApp() {
@@ -95,11 +127,12 @@ final class OverlayWindowController {
         let app = previousApp
         previousApp = nil
         guard NSApp.isActive else { return }
-        // Settings is still on screen (it's the only window of ours that can
-        // become main — the overlays are already ordered out and the toolbar
-        // can't). Pushing it behind the user's app would be worse.
-        guard !NSApp.windows.contains(where: { $0.isVisible && $0.canBecomeMain })
-        else { return }
+        // Settings is still on screen (the toolbar can't become main, and
+        // overlays — even ones left showing marks — don't count). Pushing it
+        // behind the user's app would be worse.
+        guard !NSApp.windows.contains(where: {
+            $0.isVisible && $0.canBecomeMain && !($0 is OverlayWindow)
+        }) else { return }
         if let app, !app.isTerminated {
             app.activate()
         } else {
@@ -132,7 +165,7 @@ final class OverlayWindowController {
         if windows.isEmpty {
             return
         }
-        if !windows.values.contains(where: { $0.isKeyWindow }) {
+        if isInteractive, !windows.values.contains(where: { $0.isKeyWindow }) {
             keyCursorScreenWindow()
         }
     }
@@ -146,7 +179,7 @@ final class OverlayWindowController {
         canvas.autoresizingMask = [.width, .height]
         win.contentView = canvas
         win.makeFirstResponder(canvas)
-        win.ignoresMouseEvents = store.isPassthrough
+        win.ignoresMouseEvents = isInteractive ? store.isPassthrough : true
         win.orderFront(nil)
         windows[screen.displayID] = win
     }

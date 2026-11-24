@@ -25,6 +25,7 @@ final class DrawingCanvasView: NSView, NSTextFieldDelegate {
             _ = store.currentColor
             _ = store.currentLineWidth
             _ = store.isWhiteboard
+            _ = store.isDrawing
         } onChange: { [weak self] in
             DispatchQueue.main.async {
                 self?.needsDisplay = true
@@ -49,7 +50,9 @@ final class DrawingCanvasView: NSView, NSTextFieldDelegate {
 
         // Whiteboard fill is bounded to this monitor's window — paint it
         // before translating into screen-global space.
-        if store.isWhiteboard {
+        // Skipped once drawing mode is off: a canvas left on screen to keep
+        // the marks visible must not keep a white sheet over the user's work.
+        if store.isWhiteboard && store.isDrawing {
             ctx.setFillColor(NSColor.white.cgColor)
             ctx.fill(bounds)
         }
@@ -65,7 +68,7 @@ final class DrawingCanvasView: NSView, NSTextFieldDelegate {
             ShapeRenderer.draw(shape, in: ctx)
         }
         if let preview = makePreviewShape() {
-            ShapeRenderer.draw(preview, in: ctx)
+            ShapeRenderer.draw(store.decorated(preview), in: ctx)
         }
         ctx.restoreGState()
     }

@@ -13,6 +13,8 @@ enum ShapeHitTester {
     private static let tolerance: CGFloat = 4
 
     private static func hits(shape: Shape, at point: CGPoint) -> Bool {
+        // The border is a few points of decoration; hit-test the mark itself.
+        let shape = shape.base
         switch shape {
         case .rectangle(_, _, _, let filled),
              .circle(_, _, _, let filled):
@@ -63,6 +65,8 @@ enum ShapeHitTester {
             return w
         case .text, .counter:
             return 0
+        case .outlined(let base, _):
+            return lineWidthFor(base)
         }
     }
 }
