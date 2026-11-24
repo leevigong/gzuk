@@ -9,6 +9,29 @@
     <language>en</language>
 
     <item>
+      <title>1.0.6</title>
+      <pubDate>Wed, 25 Nov 2026 00:30:00 +0900</pubDate>
+      <sparkle:version>6</sparkle:version>
+      <sparkle:shortVersionString>1.0.6</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[
+        <ul>
+          <li>그림 유지 — 설정 → 그리기에서 "그리기 모드를 꺼도 그림 유지"를 켜면, ⌥G로 나와도 그림이 화면에 남아요. 클릭은 아래 앱으로 그대로 전달돼요.</li>
+          <li>⌥V를 누르는 동안만 그리기 — 누르고 있으면 켜지고, 떼면 꺼져요.</li>
+          <li>선 테두리 — 설정에서 켜고 색을 고르면 새로 그리는 선에 테두리가 생겨 어떤 배경에서도 잘 보여요.</li>
+          <li>색 직접 선택 — 빨간색 앞의 무지개 버튼으로 원하는 색을 고를 수 있어요. 직접 고른 색으로 그리면 색상 창의 "그려적어" 팔레트에 자동으로 모여요.</li>
+          <li>마지막에 쓴 색과 굵기를 기억해요.</li>
+          <li>툴바 버튼이 두세 번 눌러야 반응하던 문제를 고쳤어요.</li>
+        </ul>
+      ]]></description>
+      <enclosure url="https://github.com/leevigong/gzuk/releases/download/v1.0.6/gzuk-1.0.6.dmg"
+                 sparkle:version="6"
+                 sparkle:shortVersionString="1.0.6"
+                 length="2778910"
+                 type="application/octet-stream"
+                 sparkle:edSignature="PDvZnV9xCIykuSJcuD5YZqyBERUP9tuICFBQABs5Y3x4A9R9dJtxslMd19VuRpxMH3FO3CRcn/g1efnXV7fKBQ==" />
+    </item>
+    <item>
       <title>1.0.5</title>
       <pubDate>Sun, 26 Jul 2026 15:31:30 +0900</pubDate>
       <sparkle:version>5</sparkle:version>
