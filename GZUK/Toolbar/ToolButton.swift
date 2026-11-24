@@ -11,6 +11,9 @@ struct ToolButton: View {
             Image(systemName: dynamicSymbolName)
                 .font(.system(size: 16, weight: .medium))
                 .frame(width: 30, height: 30)
+                // Whole 30×30 square is the target, not just the glyph's
+                // pixels (`.plain` buttons hit-test drawn content only).
+                .contentShape(Rectangle())
                 .background(
                     RoundedRectangle(cornerRadius: 5)
                         .fill(store.currentTool == tool && !store.isPassthrough

@@ -14,6 +14,10 @@ struct LineWidthPickerView: View {
                         .fill(Color.primary)
                         .frame(width: dotSize(for: w), height: dotSize(for: w))
                         .frame(width: 22, height: 22)   // hit-target
+                        // `.plain` buttons only hit-test drawn pixels, so
+                        // without this only the dot itself was clickable
+                        // (~5pt across for the thinnest width).
+                        .contentShape(Rectangle())
                         .overlay(
                             RoundedRectangle(cornerRadius: 4)
                                 .stroke(store.currentLineWidth == w

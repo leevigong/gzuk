@@ -1,4 +1,5 @@
 import AppKit
+import SwiftUI
 
 /// Floating toolbar window. Use a regular NSWindow (not NSPanel) because
 /// NSPanel's nonactivating behavior was preventing SwiftUI buttons from
@@ -76,4 +77,12 @@ final class ToolbarWindow: NSWindow {
     // Borderless windows must override these to accept events.
     override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { false }
+}
+
+/// Hosts the SwiftUI toolbar. Drawing a stroke makes the overlay key, so the
+/// next click on the toolbar arrives while it isn't key — and NSHostingView's
+/// default is to spend that click on activation only. That's why picking a
+/// width or tool right after drawing took two or three clicks.
+final class ToolbarHostingView: NSHostingView<ToolbarView> {
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 }
