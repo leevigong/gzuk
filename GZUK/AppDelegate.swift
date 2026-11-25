@@ -173,6 +173,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         let sKey: UInt16 = 1
         let wKey: UInt16 = 13
         let mKey: UInt16 = 46
+        let oKey: UInt16 = 31
         let dKey: UInt16 = 2
         let deleteKey: UInt16 = 51
 
@@ -213,6 +214,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
                 self.store.toggleWhiteboard(); return nil
             case (mKey, []):
                 self.store.toggleToolbarCollapsed(); return nil
+            case (oKey, []):
+                PreferencesStore.shared.toggleOutline(); return nil
             // ⌥D is the advertised one (same hand position as ⌥G); ⌥⌫ stays
             // for muscle memory from 1.0.3 and earlier.
             case (dKey, .option), (deleteKey, .option):

@@ -18,7 +18,8 @@ struct ColorPaletteView: View {
     static var presetColors: [NSColor] { presets.map(\.0) }
 
     var body: some View {
-        HStack(spacing: 4) {
+        // Swatches carry their own 3pt margin (SwatchCircle), so no spacing.
+        HStack(spacing: 0) {
             CustomColorButton(store: store,
                               isCustom: !Self.presetColors.contains(where: isSelected))
                 .tooltip(L.t("색상 직접 선택", "Custom color"))
@@ -37,22 +38,39 @@ struct ColorPaletteView: View {
             // nothing left to do and would only cover the screen.
             CustomColorPanel.shared.close()
         } label: {
-            Circle()
-                .fill(Color(nsColor: color))
-                .frame(width: 18, height: 18)
-                .overlay(
-                    Circle().stroke(
-                        isSelected(color)
-                            ? Color.accentColor
-                            : Color.primary.opacity(0.15),
-                        lineWidth: isSelected(color) ? 2 : 1)
-                )
+            SwatchCircle(color: color, selected: isSelected(color))
         }
         .buttonStyle(.plain)
     }
 
     private func isSelected(_ color: NSColor) -> Bool {
         CustomColorHistory.same(store.currentColor, color)
+    }
+}
+
+/// An 18pt color dot in a 24pt cell. Selected: a ring in the same color
+/// around it with a 1pt gap. (An accent-blue ring vanished on the blue
+/// swatch.)
+struct SwatchCircle: View {
+    let color: NSColor
+    let selected: Bool
+
+    var body: some View {
+        Circle()
+            .fill(Color(nsColor: color))
+            .overlay(Circle().stroke(Color.primary.opacity(0.15), lineWidth: 1))
+            .frame(width: 18, height: 18)
+            .frame(width: 24, height: 24)
+            .overlay(
+                // Ring in the swatch's own color; the 1pt gap keeps it
+                // distinct from the dot. The faint hairline stops a white
+                // ring from vanishing on the light toolbar.
+                Circle()
+                    .strokeBorder(Color(nsColor: color), lineWidth: 2)
+                    .overlay(Circle().stroke(Color.primary.opacity(0.2), lineWidth: 0.5))
+                    .opacity(selected ? 1 : 0)
+            )
+            .contentShape(Circle())
     }
 }
 
@@ -88,6 +106,7 @@ private struct CustomColorButton: View {
                 }
             }
             .frame(width: 18, height: 18)
+            .frame(width: 24, height: 24)
             .contentShape(Circle())
         }
         .buttonStyle(.plain)

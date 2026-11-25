@@ -49,7 +49,7 @@ final class PreferencesStore {
         self.language = AppLanguage(rawValue: raw) ?? .korean
         self.keepDrawingsOnExit = defaults.bool(forKey: Keys.keepDrawingsOnExit)
         self.outlineEnabled = defaults.bool(forKey: Keys.outlineEnabled)
-        self.outlineColor = Self.loadColor(defaults, Keys.outlineColor) ?? .white
+        self.outlineColor = Self.loadColor(defaults, Keys.outlineColor) ?? .black
         self.drawingColor = Self.loadColor(defaults, Keys.drawingColor)
         self.customColor = Self.loadColor(defaults, Keys.customColor)
         let width = defaults.double(forKey: Keys.drawingLineWidth)
@@ -97,6 +97,10 @@ final class PreferencesStore {
 
     func setOutlineColor(_ value: NSColor) {
         outlineColor = saveColor(value, Keys.outlineColor)
+    }
+
+    func toggleOutline() {
+        setOutlineEnabled(!outlineEnabled)
     }
 
     func setDrawingColor(_ value: NSColor) {

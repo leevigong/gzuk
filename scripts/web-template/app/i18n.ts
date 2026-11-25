@@ -96,6 +96,7 @@ export const strings = {
       { a: { ko: "지우개",             en: "Eraser" },                  k: "E" },
       { a: { ko: "커서 (패스스루)",   en: "Cursor (pass-through)" },  k: "S" },
       { a: { ko: "화이트보드",         en: "Whiteboard" },              k: "W" },
+      { a: { ko: "선 테두리 켜기/끄기", en: "Toggle stroke outline" }, k: "O" },
       { a: { ko: "툴바 접기/펴기",      en: "Toggle toolbar" },          k: "M" },
       { a: { ko: "되돌리기",           en: "Undo" },                    k: "⌥Z" },
       { a: { ko: "다시하기",           en: "Redo" },                    k: "⌥⇧Z" },

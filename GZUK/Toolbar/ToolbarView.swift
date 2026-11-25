@@ -19,18 +19,25 @@ private struct ExpandedToolbarView: View {
 
     var body: some View {
         VStack(spacing: 6) {
-            HStack(spacing: 6) {
-                ForEach(Tool.allCases) { tool in
+            // Spread across the full width so the tool row's edges line up
+            // with the (wider) color/width row below it.
+            HStack(spacing: 0) {
+                ForEach(Array(Tool.allCases.enumerated()), id: \.element) { i, tool in
+                    if i > 0 { Spacer(minLength: 6) }
                     ToolButton(tool: tool, store: store)
                         .tooltip("\(tool.displayName) (\(String(tool.hotkey).uppercased()))")
                 }
             }
+            .padding(.horizontal, 2)
 
             Divider()
             HStack(spacing: 10) {
                 ColorPaletteView(store: store)
                 Divider().frame(height: 18)
                 LineWidthPickerView(store: store)
+                Divider().frame(height: 18)
+                OutlineToggleView(store: store)
+                    .tooltip(L.t("선 테두리 색 (O: 켜기/끄기)", "Outline color (O: on/off)"))
             }
 
             Divider()
@@ -43,7 +50,10 @@ private struct ExpandedToolbarView: View {
                     .tooltip(store.isPassthrough
                              ? L.t("커서 (S)", "Cursor (S)")
                              : L.t("그리기 (S)", "Draw (S)"))
-                Divider().frame(height: 18)
+                // Three groups — modes | history | window — pushed to the
+                // edges and center so the row spans the same width as the
+                // rows above.
+                Spacer(minLength: 10)
                 Button { store.undo() } label: {
                     Image(systemName: "arrow.uturn.backward")
                         .font(.system(size: 16, weight: .medium))
@@ -62,13 +72,13 @@ private struct ExpandedToolbarView: View {
                         .frame(width: 28, height: 28)
                 }.buttonStyle(.plain)
                     .tooltip(L.t("모두 지우기 (⌥D)", "Clear all (⌥D)"))
+                Spacer(minLength: 10)
                 Button { store.toggleToolbarCollapsed() } label: {
                     Image(systemName: "arrow.down.right.and.arrow.up.left")
                         .font(.system(size: 13, weight: .medium))
                         .frame(width: 28, height: 28)
                         .foregroundStyle(.secondary)
                 }.buttonStyle(.plain)
-                    .padding(.leading, 6)
                     .tooltip(L.t("접기 (M)", "Minimize (M)"))
                 Button { store.toggle() } label: {
                     Image(systemName: "xmark.circle.fill")
@@ -78,6 +88,7 @@ private struct ExpandedToolbarView: View {
                 }.buttonStyle(.plain)
                     .tooltip(L.t("닫기 (⌥G)", "Close (⌥G)"))
             }
+            .padding(.horizontal, 2)
 
             // Visual grip indicator at the bottom — actual drag is handled
             // by the DragHandleView placed behind the buttons.
@@ -93,7 +104,9 @@ private struct ExpandedToolbarView: View {
             RoundedRectangle(cornerRadius: 10)
                 .strokeBorder(Color.primary.opacity(0.15), lineWidth: 1)
         )
-        .frame(width: 380)
+        // Sized to the widest row (colors | widths | outline ≈ 384pt plus
+        // padding). Grow this when that row gains anything, or it clips.
+        .frame(width: 410)
     }
 }
 

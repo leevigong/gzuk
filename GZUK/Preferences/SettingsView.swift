@@ -142,6 +142,12 @@ private struct ShortcutsTab: View {
                           systemImage: "square.and.pencil")
                 }
                 LabeledContent {
+                    KeyCap("O")
+                } label: {
+                    Label(L.t("선 테두리 켜기 / 끄기", "Toggle stroke outline"),
+                          systemImage: "circle.circle")
+                }
+                LabeledContent {
                     KeyCap("M")
                 } label: {
                     Label(L.t("툴바 접기 / 펼치기", "Minimize / expand toolbar"),
@@ -188,52 +194,5 @@ private struct KeyCap: View {
             .padding(.vertical, 2)
             .background(Color.secondary.opacity(0.15))
             .clipShape(RoundedRectangle(cornerRadius: 4))
-    }
-}
-
-// MARK: - Outline swatches
-
-/// "None" plus the toolbar's preset colors, in one row. Replaces a separate
-/// on/off toggle + ColorPicker: the picker shared the system color panel with
-/// the toolbar's rainbow swatch, which positions it next to the toolbar — on
-/// a dual-monitor setup that's often a different screen from Settings.
-private struct OutlineSwatches: View {
-    let prefs: PreferencesStore
-
-    var body: some View {
-        HStack(spacing: 4) {
-            Button {
-                prefs.setOutlineEnabled(false)
-            } label: {
-                Image(systemName: "nosign")
-                    .font(.system(size: 14))
-                    .foregroundColor(.secondary)
-                    .frame(width: 18, height: 18)
-                    .overlay(ring(selected: !prefs.outlineEnabled))
-                    .contentShape(Circle())
-            }
-            .buttonStyle(.plain)
-            .help(L.t("테두리 없음", "No outline"))
-
-            ForEach(Array(ColorPaletteView.presetColors.enumerated()), id: \.offset) { _, color in
-                let selected = prefs.outlineEnabled
-                    && CustomColorHistory.same(prefs.outlineColor, color)
-                Button {
-                    prefs.setOutlineColor(color)
-                    prefs.setOutlineEnabled(true)
-                } label: {
-                    Circle()
-                        .fill(Color(nsColor: color))
-                        .frame(width: 18, height: 18)
-                        .overlay(ring(selected: selected))
-                }
-                .buttonStyle(.plain)
-            }
-        }
-    }
-
-    private func ring(selected: Bool) -> some View {
-        Circle().stroke(selected ? Color.accentColor : Color.primary.opacity(0.15),
-                        lineWidth: selected ? 2 : 1)
     }
 }
