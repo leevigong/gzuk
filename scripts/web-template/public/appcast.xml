@@ -9,6 +9,35 @@
     <language>en</language>
 
     <item>
+      <title>1.0.8</title>
+      <pubDate>Wed, 25 Nov 2026 20:30:00 +0900</pubDate>
+      <sparkle:version>8</sparkle:version>
+      <sparkle:shortVersionString>1.0.8</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[
+        <ul>
+          <li>툴바에서 선 테두리 고르기 — 굵기 옆 테두리 버튼을 누르면 테두리 색을 바로 고를 수 있어요. 버튼 아이콘이 "펜 색 + 테두리 색"을 미리 보여줘요. O 키로 켜고 끌 수도 있어요.</li>
+          <li>테두리 기본 색이 검정으로 바뀌었어요.</li>
+          <li>선택한 색이 더 잘 보여요. 같은 색 링이 틈을 두고 둘러져서 파랑을 골라도 또렷해요.</li>
+          <li>툴바 줄 정렬을 맞추고, 가운데 줄이 잘리던 문제를 고쳤어요.</li>
+        </ul>
+        <p><b>1.0.6~1.0.7에서 바뀐 것</b></p>
+        <ul>
+          <li>그림 유지 — 설정 → 그리기에서 "그리기 모드를 꺼도 그림 유지"를 켜면, ⌥G로 나와도 그림이 화면에 남아요. 클릭은 아래 앱으로 그대로 전달돼요.</li>
+          <li>⌥V를 누르는 동안만 그리기 — 누르고 있으면 켜지고, 떼면 꺼져요.</li>
+          <li>색 직접 선택 — 빨간색 앞의 무지개 버튼으로 원하는 색을 고를 수 있어요. 직접 고른 색으로 그리면 색상 창의 "그려적어" 팔레트에 자동으로 모여요.</li>
+          <li>마지막에 쓴 색과 굵기를 기억해요.</li>
+          <li>툴바 버튼이 두세 번 눌러야 반응하던 문제를 고쳤어요.</li>
+        </ul>
+      ]]></description>
+      <enclosure url="https://github.com/leevigong/gzuk/releases/download/v1.0.8/gzuk-1.0.8.dmg"
+                 sparkle:version="8"
+                 sparkle:shortVersionString="1.0.8"
+                 length="2809239"
+                 type="application/octet-stream"
+                 sparkle:edSignature="qD4ESQSk0hWcH6A6370iLdcssTpdLQ+OA3X1xvzZig14zE8PBH97fFQNXril4evCMlUkF1/W3euFMYJJGAv7Ag==" />
+    </item>
+    <item>
       <title>1.0.7</title>
       <pubDate>Wed, 25 Nov 2026 20:00:00 +0900</pubDate>
       <sparkle:version>7</sparkle:version>
