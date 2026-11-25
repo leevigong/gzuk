@@ -140,7 +140,7 @@ final class PreferencesStore {
         (defaults.array(forKey: key) as? [Double]).flatMap(color(fromRGBA:))
     }
 
-    private static func color(fromRGBA c: [Double]) -> NSColor? {
+    nonisolated private static func color(fromRGBA c: [Double]) -> NSColor? {
         guard c.count == 4 else { return nil }
         return NSColor(srgbRed: c[0], green: c[1], blue: c[2], alpha: c[3])
     }

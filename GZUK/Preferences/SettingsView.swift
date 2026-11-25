@@ -38,29 +38,17 @@ private struct GeneralTab: View {
                               "Keep drawings after exiting"),
                           systemImage: "pin")
                 }
-                Toggle(isOn: Binding(
-                    get: { prefs.outlineEnabled },
-                    set: { prefs.setOutlineEnabled($0) })
-                ) {
+                LabeledContent {
+                    OutlineSwatches(prefs: prefs)
+                } label: {
                     Label(L.t("선 테두리", "Stroke outline"),
                           systemImage: "circle.dashed")
                 }
-                LabeledContent {
-                    ColorPicker("", selection: Binding(
-                        get: { Color(nsColor: prefs.outlineColor) },
-                        set: { prefs.setOutlineColor(NSColor($0)) }),
-                                supportsOpacity: false)
-                        .labelsHidden()
-                } label: {
-                    Label(L.t("테두리 색상", "Outline color"),
-                          systemImage: "paintpalette")
-                }
-                .disabled(!prefs.outlineEnabled)
             } header: {
                 Text(L.t("그리기", "Drawing"))
             } footer: {
-                Text(L.t("그림을 유지하면 ⌥G로 나온 뒤에도 표시가 남고, 클릭은 아래 앱으로 그대로 전달돼요. 테두리는 새로 그리는 선부터 적용돼요.",
-                         "Kept drawings stay on screen after ⌥G and let clicks through to the app below. The outline applies to new strokes."))
+                Text(L.t("그림을 유지하면 ⌥G로 나온 뒤에도 표시가 남고, 클릭은 아래 앱으로 그대로 전달돼요. 테두리는 ⊘로 끌 수 있고, 새로 그리는 선부터 적용돼요.",
+                         "Kept drawings stay on screen after ⌥G and let clicks through to the app below. Pick ⊘ for no outline; it applies to new strokes."))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -200,5 +188,52 @@ private struct KeyCap: View {
             .padding(.vertical, 2)
             .background(Color.secondary.opacity(0.15))
             .clipShape(RoundedRectangle(cornerRadius: 4))
+    }
+}
+
+// MARK: - Outline swatches
+
+/// "None" plus the toolbar's preset colors, in one row. Replaces a separate
+/// on/off toggle + ColorPicker: the picker shared the system color panel with
+/// the toolbar's rainbow swatch, which positions it next to the toolbar — on
+/// a dual-monitor setup that's often a different screen from Settings.
+private struct OutlineSwatches: View {
+    let prefs: PreferencesStore
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Button {
+                prefs.setOutlineEnabled(false)
+            } label: {
+                Image(systemName: "nosign")
+                    .font(.system(size: 14))
+                    .foregroundColor(.secondary)
+                    .frame(width: 18, height: 18)
+                    .overlay(ring(selected: !prefs.outlineEnabled))
+                    .contentShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .help(L.t("테두리 없음", "No outline"))
+
+            ForEach(Array(ColorPaletteView.presetColors.enumerated()), id: \.offset) { _, color in
+                let selected = prefs.outlineEnabled
+                    && CustomColorHistory.same(prefs.outlineColor, color)
+                Button {
+                    prefs.setOutlineColor(color)
+                    prefs.setOutlineEnabled(true)
+                } label: {
+                    Circle()
+                        .fill(Color(nsColor: color))
+                        .frame(width: 18, height: 18)
+                        .overlay(ring(selected: selected))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private func ring(selected: Bool) -> some View {
+        Circle().stroke(selected ? Color.accentColor : Color.primary.opacity(0.15),
+                        lineWidth: selected ? 2 : 1)
     }
 }
